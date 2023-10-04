@@ -1,0 +1,123 @@
+---
+title: "Buenas practicas de programación"
+author: "Larissa Cordero"
+date: "2023-10-04"
+output: html_document
+---
+# R script 
+## Ideal para escribir y correr codigo 
+Es util cuando se tiene que escribir mucho texto 
+Desventaja: no se puede formar el texto
+
+__R Mark Down__
+
+[Cheat sheet](https://www.google.com/search?q=cheat+sheet+markdown&sca_esv=570700320&rlz=1C1GCEU_enMX981MX981&ei=CpIdZbKhIYGmqtsP2eiHgAk&oq=cheat+sheet+mark&gs_lp=Egxnd3Mtd2l6LXNlcnAiEGNoZWF0IHNoZWV0IG1hcmsqAggAMgUQABiABDIFEAAYgAQyBhAAGBYYHjIGEAAYFhgeMgYQABgWGB4yBhAAGBYYHjIGEAAYFhgeMgYQABgWGB4yBhAAGBYYHjIGEAAYFhgeSO4XUKYDWNsPcAJ4AZABAJgBV6ABuwOqAQE2uAEDyAEA-AEBwgIKEAAYRxjWBBiwA8ICChAAGIAEGEYY_wHCAgcQABiABBgK4gMEGAAgQYgGAZAGCA&sclient=gws-wiz-serp)
+
+[Chunks](https://rmarkdown.rstudio.com/lesson-3.html)
+
+## Este tipo incluye tanto texto como codigo 
+
+* Desventajas
+  + Es mas tardado cuando se tienen largas secciones de codigo
+  + Es más pesdado 
+
+* Ventajas 
+  + Cuando no se insera un chunk de codigo se puede escribir como word
+  + Se puede convertir en PDF, HTML o Word
+ 
+ __R Note Book__
+ 
+ _Es un formato hibrido que se puede ewscribir todo lo que quieras_
+ 
+```{r}
+
+#Valores
+
+a <- 1342 
+
+b <- a / 2
+
+var <- "Larissa"
+
+rm(var) # remove o quitar el enviroment
+```
+ 
+```{r}
+
+# Vectores
+
+vect <- c(1,2,3,4,5)
+
+nombres <- c("Larissa", "Celina", "Hugo", "Daniel", "Mariana")
+
+part_1 <- "Larissa"
+
+particip <- c(part_1, "Celina")
+
+## Todo lo que esta antes de una flecha son los objetos
+
+```
+
+### Matrices 
+
+Un tipo de tabla en el que todos sus valores son numericos. El fromato de matriz a veces es necesario para ciertos calculos y/o tipo de graficos.
+
+```{r}
+
+## Creando una matriz desde cero
+
+ejemplomat <- matrix(c(1, 2, 3, 4, 5, 6, 7, 8, 9), # datos para matriz
+                     nrow = 3, # numero de filas
+                     ncol = 3, # numero de columnas
+                     byrow = TRUE) # organizacion de matriz
+
+ejemplomat
+
+# nombres de filas 
+rownames(ejemplomat) <- c("a", "b", "c")
+
+ejemplomat
+
+# nombre de columnas 
+colnames(ejemplomat) <- c("C", "d", "e")
+
+ejemplomat
+
+```
+### Data frames
+
+Este es el nombre que tienen las tablas en RStudio. La definicion de una data frame es una agrupacion de vectores que tienes valores de diferentes tipos. Por ejemplo: numeric and character
+
+Una matriz se puede volver una data frames para cuando lo haces al reves usualmente se pierden datos o puede ocurrir un error
+
+```{r}
+
+## haciedno una tabla desde cero en RStudio
+
+Nombress <- c("Celina", "Hugo", "Daniel", "Mariana", "Larissa")
+Edades <- c(28, 30, 27, 26, 28)
+
+intentotabla <- data.frame(Nombress, Edades)
+
+intentotabla
+
+intentotabla2 <- data.frame(Nombress = c("Celina", "Hugo", "Daniel", "Mariana", "Larissa"), Edades = c(28, 30, 27, 26, 28))
+
+intentotabla2
+
+# Cuando quiero ver la tabla me tengo que ir a environment y darle clic al nombre de la tabla que le asignamos 
+
+
+```
+
+
+
+
+
+
+
+
+ 
+ 
+ 
+
