@@ -1,0 +1,86 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+## Introduccion
+
+Comandos en RStudio que puede ayudar a automatizar nuestro codigo condensando pasos repetitivos en un solo comando (para varias lineas de codigo!)
+
+## Funciones
+
+Set de argumentos que se organizan juntos para realizar una tarea especifica 
+
+En realidad todos los comandos que hemos usado son las funciones que ya vienen incluidas en R pero RStudio tambien nos da la posibilidad de creas nuestras propias funciones
+
+### Componentes de una funcion
+
+*__Nombre de la funcion:__ nosotros se lo damos
+*__Argumentos:__ los elementos necesario para llebar a cabo la funcion
+*__Cuerpo de la funcion:__ Define lo que va hacer la funcion _input_
+*__Respuesta:_ el valor o resultado de la tarea asignada a una funcion _output_
+
+```{r}
+nombre_funcion <- function (Argumentos) { # lo que necesitas para calcular la funcion 
+  respuesta <- haz_algo (Argumentos) # calculos o modificaciones que haras con los argumentos 
+  return (respuesta) # lo que se va a "imprimir"
+  } # todo lo que esta entre corchetes es la funcion
+
+
+```
+
+Pienen en las funciones como una accion por lo que por lo general el nombre empieza con un verbo:
+
+```{r}
+calc_vol_foliar <- function(longit, ancho, altura) {
+  area <- longit * ancho
+  volumen <- area * altura
+  return(volumen)
+}
+
+# Ahora usamos la funcion
+
+calc_vol_foliar(2,1.8,3)
+
+# Guardar objeto 
+
+arbusto1 <- calc_vol_foliar(2,1.8,3)
+
+# Ahora usemos datos desde dateframe
+
+### Set de datos artificial ###
+
+Long <- c(1, 2.5)
+Alto <- c(2, 1.5)
+Ancho <- c(1.8, 3)
+
+Arbustos <- data.frame(Long, Alto, Ancho)
+
+# Usemos la funcion
+
+calc_vol_foliar(Arbustos$Long[1], # En estos brackets no hay como porque es una columna osea solo una dimension
+                Arbustos$Alto[1],
+                Arbustos$Ancho[1])
+
+# sin la funcion
+Arbustos$Long[1]*Arbustos$Alto[1]*Arbustos$Ancho[1]
+
+Funcion que calcule el area foliar de una despecie de arboles unica en el mundo que tiene hojas triangulares : $A = bh/2$
+
+
+```
+
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.

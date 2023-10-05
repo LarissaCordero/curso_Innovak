@@ -2,7 +2,7 @@
 title: "Buenas practicas de programación"
 author: "Larissa Cordero"
 date: "2023-10-04"
-output: html_document
+output: html_notebook
 ---
 # R script 
 ## Ideal para escribir y correr codigo 
@@ -109,6 +109,99 @@ intentotabla2
 
 
 ```
+## Subiendo una tabla desde excel 
+```{r}
+
+# Usando R Base
+Dat_clase <- read.csv("~/capR/curso/curso_Innovak/Material clase/Class-data.csv")
+
+Acidos <- read.csv("~/capR/curso/curso_Innovak/Material clase/Acidos_ex.csv")
+rm(Dat_clase2)
+
+# A matriz
+Acidos <- as.matrix(Acidos)
+
+rownames(Acidos) <- Acidos[,1]  # Tabla [filas, columnas]
+
+Acidos <- Acidos[,-1] # Con el signo - se elimina las filas o columnas 
+
+# De vuelta a dateframe
+
+Acidos <- as.data.frame(Acidos)  # puede ser util para agregar metadatos
+
+Acidos$NPC
+
+
+```
+### Listas y otros objetos raros
+
+Las listas en RStudio son una coleccion de otros objetos en R. Rara vez van a crear una desde cero pero es importante reconocerlas cuando alguna formula da como resultado una lista. De esta manera se puede extraer objetos especificos de una lista en R Studio para algun analisis en especifico 
+
+```{r}
+## Creando una lista
+
+lista_ejemplo <- list(c("Jan","Feb","Mar"),
+                      matrix(c(3,9,5,1,-2,8), nrow = 2),
+                      list("green",12.3))
+
+# nombre de los elementos de la lista
+
+names(lista_ejemplo) <- c("Meses", "Matriz", "Lista interna") 
+
+# Ver lista
+
+print(lista_ejemplo)
+
+# Extraer objetos de la lista
+
+matriz_lista <- lista_ejemplo$Matriz
+
+## Objetos raros
+
+
+
+```
+
+## Paquetes 
+
+Son extensiones al programa base de RStudio 
+Contiene codigo, datos y documentacion que pueden ayudar a su
+entendimiento
+
+Como instalar un paquete:
+
+*Manera facil: desde la consola -> 
+*Manera dificil: con codigo
+
+```{r}
+library(tidyverse)
+```
+No se puede usar un paquete si no esta descargado sin embargo si lo tienes descargado pero no quieres usarlo en todo tu script esta la siguiente opcion :
+
+```{r}
+
+Acidos <- tidyverse::read_cvs("Material_clase/Acidos_ex.csv") #este no usarlo
+
+??tidyverse # Para dudas que tenga de los paquetes, sale todo que contenga la palabra
+
+
+?matrix # Para duda que tenga mas especifico y vienen los codigos como poner 
+
+```
+
+## Comandos 
+
+Todo el codigo que hemos estado escribiendo puede definicrse como comandos los cuales usando un formato estandar piden un input para entregarle al usuario un output
+
+```{r}
+
+library(car) # La instalacion solo es una vez y cargar la libreria es cada que abras RStudio
+
+?Anova
+
+```
+
+
 
 
 
