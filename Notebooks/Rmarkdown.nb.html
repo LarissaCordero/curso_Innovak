@@ -1827,16 +1827,28 @@ fromato de matriz a veces es necesario para ciertos calculos y/o tipo de
 graficos.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZWplbXBsb21hdFxuXG5gYGAifQ== -->
-<pre class="r"><code>ejemplomat
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG4jIyBDcmVhbmRvIHVuYSBtYXRyaXogZGVzZGUgY2Vyb1xuXG5lamVtcGxvbWF0IDwtIG1hdHJpeChjKDEsIDIsIDMsIDQsIDUsIDYsIDcsIDgsIDkpLCAjIGRhdG9zIHBhcmEgbWF0cml6XG4gICAgICAgICAgICAgICAgICAgICBucm93ID0gMywgIyBudW1lcm8gZGUgZmlsYXNcbiAgICAgICAgICAgICAgICAgICAgIG5jb2wgPSAzLCAjIG51bWVybyBkZSBjb2x1bW5hc1xuICAgICAgICAgICAgICAgICAgICAgYnlyb3cgPSBUUlVFKSAjIG9yZ2FuaXphY2lvbiBkZSBtYXRyaXpcblxuZWplbXBsb21hdFxuXG4jIG5vbWJyZXMgZGUgZmlsYXMgXG5yb3duYW1lcyhlamVtcGxvbWF0KSA8LSBjKFwiYVwiLCBcImJcIiwgXCJjXCIpXG5cbmVqZW1wbG9tYXRcblxuIyBub21icmUgZGUgY29sdW1uYXMgXG5jb2xuYW1lcyhlamVtcGxvbWF0KSA8LSBjKFwiQ1wiLCBcImRcIiwgXCJlXCIpXG5cbmVqZW1wbG9tYXRcblxuYGBgIn0= -->
+<pre class="r"><code>
+## Creando una matriz desde cero
+
+ejemplomat &lt;- matrix(c(1, 2, 3, 4, 5, 6, 7, 8, 9), # datos para matriz
+                     nrow = 3, # numero de filas
+                     ncol = 3, # numero de columnas
+                     byrow = TRUE) # organizacion de matriz
+
+ejemplomat
+
+# nombres de filas 
+rownames(ejemplomat) &lt;- c(&quot;a&quot;, &quot;b&quot;, &quot;c&quot;)
+
+ejemplomat
+
+# nombre de columnas 
+colnames(ejemplomat) &lt;- c(&quot;C&quot;, &quot;d&quot;, &quot;e&quot;)
+
+ejemplomat
 </code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiICBDIGQgZVxuYSAxIDIgM1xuYiA0IDUgNlxuYyA3IDggOVxuIn0= -->
-<pre><code>  C d e
-a 1 2 3
-b 4 5 6
-c 7 8 9</code></pre>
-<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
@@ -1849,13 +1861,24 @@ diferentes tipos. Por ejemplo: numeric and character</p>
 reves usualmente se pierden datos o puede ocurrir un error</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImRhdGEuZnJhbWUiXSwibnJvdyI6NSwibmNvbCI6Miwic3VtbWFyeSI6W119LCJyZGYiOiJINHNJQUFBQUFBQUFCbDFSeTA3RE1CRGNPREdoa1lvcTlUc1NWUlJCN3hURUFYcEFJUFc2VFV5eFNPM0tUZ1JIdnJ4Z0ozYlVlQytlblozWmgveTYzaTZ6YlFZQU1TUnhCREUxRU9qNzIyTytBa2lJU1NKSVlHTGZIeU9hRzJESm1WVzV3c1U5cTdsQWx5VlA3Vjc2eWhvRlo3WEwwaGRVSEFkaCtteFNyVEhvUnE1WEhpMFhBM2Mzb05zejNYaEJLdkRBdEd0SEhIbTVrWWVkWWxyN2xSNHFyS3hxWkowbytWMTQrOVRhZjZFTEdzNG9hOVIraGllekNoc3NQcFR4bSt3VVdGSjViTGdVeGtUbWZjZVJPVklCTVd1RjNhVEt5ODlXZk9VM0N6dWhxL2N4ZFppZVlkTFBKSC9oMXpDeDU0TDU1V3ZjRGI5eFpVN3VMaTZPaW92R24ySllYVFN5UWEvTFNsbDdwanNPVHYvd0J5ZzBOUUlBQUE9PSJ9 -->
-<div data-pagedtable="false">
-<script data-pagedtable-source type="application/json">
-{"columns":[{"label":["Nombress"],"name":[1],"type":["chr"],"align":["left"]},{"label":["Edades"],"name":[2],"type":["chr"],"align":["left"]}],"data":[{"1":"Celina","2":"28"},{"1":"Hugo","2":"30"},{"1":"Daniel","2":"27"},{"1":"Mariana","2":"26"},{"1":"Larissa","2":"28"}],"options":{"columns":{"min":{},"max":[10],"total":[2]},"rows":{"min":[10],"max":[10],"total":[5]},"pages":{}}}
-  </script>
-</div>
-<!-- rnb-frame-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG4jIyBoYWNpZWRubyB1bmEgdGFibGEgZGVzZGUgY2VybyBlbiBSU3R1ZGlvXG5cbk5vbWJyZXNzIDwtIGMoXCJDZWxpbmFcIiwgXCJIdWdvXCIsIFwiRGFuaWVsXCIsIFwiTWFyaWFuYVwiLCBcIkxhcmlzc2FcIilcbkVkYWRlcyA8LSBjKDI4LCAzMCwgMjcsIDI2LCAyOClcblxuaW50ZW50b3RhYmxhIDwtIGRhdGEuZnJhbWUoTm9tYnJlc3MsIEVkYWRlcylcblxuaW50ZW50b3RhYmxhXG5cbmludGVudG90YWJsYTIgPC0gZGF0YS5mcmFtZShOb21icmVzcyA9IGMoXCJDZWxpbmFcIiwgXCJIdWdvXCIsIFwiRGFuaWVsXCIsIFwiTWFyaWFuYVwiLCBcIkxhcmlzc2FcIiksIEVkYWRlcyA9IGMoMjgsIDMwLCAyNywgMjYsIDI4KSlcblxuaW50ZW50b3RhYmxhMlxuXG4jIEN1YW5kbyBxdWllcm8gdmVyIGxhIHRhYmxhIG1lIHRlbmdvIHF1ZSBpciBhIGVudmlyb25tZW50IHkgZGFybGUgY2xpYyBhbCBub21icmUgZGUgbGEgdGFibGEgcXVlIGxlIGFzaWduYW1vcyBcblxuXG5gYGAifQ== -->
+<pre class="r"><code>
+## haciedno una tabla desde cero en RStudio
+
+Nombress &lt;- c(&quot;Celina&quot;, &quot;Hugo&quot;, &quot;Daniel&quot;, &quot;Mariana&quot;, &quot;Larissa&quot;)
+Edades &lt;- c(28, 30, 27, 26, 28)
+
+intentotabla &lt;- data.frame(Nombress, Edades)
+
+intentotabla
+
+intentotabla2 &lt;- data.frame(Nombress = c(&quot;Celina&quot;, &quot;Hugo&quot;, &quot;Daniel&quot;, &quot;Mariana&quot;, &quot;Larissa&quot;), Edades = c(28, 30, 27, 26, 28))
+
+intentotabla2
+
+# Cuando quiero ver la tabla me tengo que ir a environment y darle clic al nombre de la tabla que le asignamos 
+</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
@@ -1864,14 +1887,13 @@ reves usualmente se pierden datos o puede ocurrir un error</p>
 <h2>Subiendo una tabla desde excel</h2>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuQWNpZG9zJE5QQ1xuXG5gYGAifQ== -->
-<pre class="r"><code>Acidos$NPC
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBVc2FuZG8gUiBCYXNlXG5EYXRfY2xhc2UgPC0gcmVhZC5jc3YoXCJ+L2NhcFIvY3Vyc28vY3Vyc29fSW5ub3Zhay9NYXRlcmlhbCBjbGFzZS9DbGFzcy1kYXRhLmNzdlwiKVxuXG5gYGAifQ== -->
+<pre class="r"><code># Usando R Base
+Dat_clase &lt;- read.csv(&quot;~/capR/curso/curso_Innovak/Material clase/Class-data.csv&quot;)
 </code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiIFsxXSBcIiAgNTEwMjg3Ljg4XCIgXCIyNDIzNzYwNC4wMVwiIFwiIDEyMTc4NDYuOTRcIiBcIiAgMzA4MzY2LjAyXCIgXCIgICAxMDc3Mi4zOFwiXG4gWzZdIFwiIDE4MTY5NzAuNDdcIiBcIjc2MTk1NjYyLjMwXCIgXCIgODM1MzM0My43NlwiIFwiIDEwNTY1NjEuNjlcIiBcIiAgIDkzNzA0Ljc3XCJcblsxMV0gXCIgNDQ0MjY5OS44N1wiIFwiMjY2NTQyOTAuMDlcIiBcIiAgMzAyNDgwLjg2XCIgXCIgIDcxNDUyMS4xNVwiIFwiIDI0MDM5MzguODFcIlxuIn0= -->
-<pre><code> [1] &quot;  510287.88&quot; &quot;24237604.01&quot; &quot; 1217846.94&quot; &quot;  308366.02&quot; &quot;   10772.38&quot;
- [6] &quot; 1816970.47&quot; &quot;76195662.30&quot; &quot; 8353343.76&quot; &quot; 1056561.69&quot; &quot;   93704.77&quot;
-[11] &quot; 4442699.87&quot; &quot;26654290.09&quot; &quot;  302480.86&quot; &quot;  714521.15&quot; &quot; 2403938.81&quot;</code></pre>
+<!-- rnb-output-begin eyJkYXRhIjoiV2FybmluZzogbm8gZnVlIHBvc2libGUgYWJyaXIgZWwgYXJjaGl2byAnQzovVXNlcnMvbGNvcmRlcm8vRG9jdW1lbnRzL2NhcFIvY3Vyc28vY3Vyc29fSW5ub3Zhay9NYXRlcmlhbCBjbGFzZS9DbGFzcy1kYXRhLmNzdic6IE5vIHN1Y2ggZmlsZSBvciBkaXJlY3RvcnlFcnJvciBpbiBmaWxlKGZpbGUsIFwicnRcIikgOiBubyBzZSBwdWVkZSBhYnJpciBsYSBjb25leGnDs25cbiJ9 -->
+<pre><code>Warning: no fue posible abrir el archivo &#39;C:/Users/lcordero/Documents/capR/curso/curso_Innovak/Material clase/Class-data.csv&#39;: No such file or directoryError in file(file, &quot;rt&quot;) : no se puede abrir la conexión</code></pre>
 <!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
@@ -1884,26 +1906,28 @@ extraer objetos especificos de una lista en R Studio para algun analisis
 en especifico</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucHJpbnQobGlzdGFfZWplbXBsbylcblxuYGBgIn0= -->
-<pre class="r"><code>print(lista_ejemplo)
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyMgQ3JlYW5kbyB1bmEgbGlzdGFcblxubGlzdGFfZWplbXBsbyA8LSBsaXN0KGMoXCJKYW5cIixcIkZlYlwiLFwiTWFyXCIpLFxuICAgICAgICAgICAgICAgICAgICAgIG1hdHJpeChjKDMsOSw1LDEsLTIsOCksIG5yb3cgPSAyKSxcbiAgICAgICAgICAgICAgICAgICAgICBsaXN0KFwiZ3JlZW5cIiwxMi4zKSlcblxuIyBub21icmUgZGUgbG9zIGVsZW1lbnRvcyBkZSBsYSBsaXN0YVxuXG5uYW1lcyhsaXN0YV9lamVtcGxvKSA8LSBjKFwiTWVzZXNcIiwgXCJNYXRyaXpcIiwgXCJMaXN0YSBpbnRlcm5hXCIpIFxuXG4jIFZlciBsaXN0YVxuXG5wcmludChsaXN0YV9lamVtcGxvKVxuXG4jIEV4dHJhZXIgb2JqZXRvcyBkZSBsYSBsaXN0YVxuXG5tYXRyaXpfbGlzdGEgPC0gbGlzdGFfZWplbXBsbyRNYXRyaXpcblxuIyMgT2JqZXRvcyByYXJvc1xuXG5cblxuYGBgIn0= -->
+<pre class="r"><code>## Creando una lista
+
+lista_ejemplo &lt;- list(c(&quot;Jan&quot;,&quot;Feb&quot;,&quot;Mar&quot;),
+                      matrix(c(3,9,5,1,-2,8), nrow = 2),
+                      list(&quot;green&quot;,12.3))
+
+# nombre de los elementos de la lista
+
+names(lista_ejemplo) &lt;- c(&quot;Meses&quot;, &quot;Matriz&quot;, &quot;Lista interna&quot;) 
+
+# Ver lista
+
+print(lista_ejemplo)
+
+# Extraer objetos de la lista
+
+matriz_lista &lt;- lista_ejemplo$Matriz
+
+## Objetos raros
 </code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiJE1lc2VzXG5bMV0gXCJKYW5cIiBcIkZlYlwiIFwiTWFyXCJcblxuJE1hdHJpelxuICAgICBbLDFdIFssMl0gWywzXVxuWzEsXSAgICAzICAgIDUgICAtMlxuWzIsXSAgICA5ICAgIDEgICAgOFxuXG4kYExpc3RhIGludGVybmFgXG4kYExpc3RhIGludGVybmFgW1sxXV1cblsxXSBcImdyZWVuXCJcblxuJGBMaXN0YSBpbnRlcm5hYFtbMl1dXG5bMV0gMTIuM1xuIn0= -->
-<pre><code>$Meses
-[1] &quot;Jan&quot; &quot;Feb&quot; &quot;Mar&quot;
-
-$Matriz
-     [,1] [,2] [,3]
-[1,]    3    5   -2
-[2,]    9    1    8
-
-$`Lista interna`
-$`Lista interna`[[1]]
-[1] &quot;green&quot;
-
-$`Lista interna`[[2]]
-[1] 12.3</code></pre>
-<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
@@ -1917,21 +1941,9 @@ documentacion que pueden ayudar a su entendimiento</p>
 codigo</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeSh0aWR5dmVyc2UpXG5cbmBgYCJ9 -->
-<pre class="r"><code>library(tidyverse)
-</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeSh0aWR5dmVyc2UpXG5gYGAifQ== -->
+<pre class="r"><code>library(tidyverse)</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoi4pSA4pSAIEF0dGFjaGluZyBjb3JlIHRpZHl2ZXJzZSBwYWNrYWdlcyDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIAgdGlkeXZlcnNlIDIuMC4wIOKUgOKUgFxu4pyUIGRwbHlyICAgICAxLjEuMyAgICAg4pyUIHJlYWRyICAgICAyLjEuNFxu4pyUIGZvcmNhdHMgICAxLjAuMCAgICAg4pyUIHN0cmluZ3IgICAxLjUuMFxu4pyUIGdncGxvdDIgICAzLjQuMyAgICAg4pyUIHRpYmJsZSAgICAzLjIuMVxu4pyUIGx1YnJpZGF0ZSAxLjkuMyAgICAg4pyUIHRpZHlyICAgICAxLjMuMFxu4pyUIHB1cnJyICAgICAxLjAuMiAgICAg4pSA4pSAIENvbmZsaWN0cyDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIAgdGlkeXZlcnNlX2NvbmZsaWN0cygpIOKUgOKUgFxu4pyWIGRwbHlyOjpmaWx0ZXIoKSBtYXNrcyBzdGF0czo6ZmlsdGVyKClcbuKcliBkcGx5cjo6bGFnKCkgICAgbWFza3Mgc3RhdHM6OmxhZygpXG7ihLkgVXNlIHRoZSBcdTAwMWJdODs7aHR0cDovL2NvbmZsaWN0ZWQuci1saWIub3JnL1x1MDAwN2NvbmZsaWN0ZWQgcGFja2FnZVx1MDAxYl04OztcdTAwMDcgdG8gZm9yY2UgYWxsIGNvbmZsaWN0cyB0byBiZWNvbWUgZXJyb3JzXG4ifQ== -->
-<pre><code>── Attaching core tidyverse packages ─────────────────── tidyverse 2.0.0 ──
-✔ dplyr     1.1.3     ✔ readr     2.1.4
-✔ forcats   1.0.0     ✔ stringr   1.5.0
-✔ ggplot2   3.4.3     ✔ tibble    3.2.1
-✔ lubridate 1.9.3     ✔ tidyr     1.3.0
-✔ purrr     1.0.2     ── Conflicts ───────────────────────────────────── tidyverse_conflicts() ──
-✖ dplyr::filter() masks stats::filter()
-✖ dplyr::lag()    masks stats::lag()
-ℹ Use the ]8;;http://conflicted.r-lib.org/conflicted package]8;; to force all conflicts to become errors</code></pre>
-<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>No se puede usar un paquete si no esta descargado sin embargo si lo
@@ -1939,13 +1951,16 @@ tienes descargado pero no quieres usarlo en todo tu script esta la
 siguiente opcion :</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuQWNpZG9zIDwtIHRpZHl2ZXJzZTo6cmVhZF9jdnMoXCJNYXRlcmlhbF9jbGFzZS9BY2lkb3NfZXguY3N2XCIpXG5cbmBgYCJ9 -->
-<pre class="r"><code>Acidos &lt;- tidyverse::read_cvs(&quot;Material_clase/Acidos_ex.csv&quot;)
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG5BY2lkb3MgPC0gdGlkeXZlcnNlOjpyZWFkX2N2cyhcIk1hdGVyaWFsX2NsYXNlL0FjaWRvc19leC5jc3ZcIikgI2VzdGUgbm8gdXNhcmxvXG5cbj8/dGlkeXZlcnNlICMgUGFyYSBkdWRhcyBxdWUgdGVuZ2EgZGUgbG9zIHBhcXVldGVzLCBzYWxlIHRvZG8gcXVlIGNvbnRlbmdhIGxhIHBhbGFicmFcblxuXG4/bWF0cml4ICMgUGFyYSBkdWRhIHF1ZSB0ZW5nYSBtYXMgZXNwZWNpZmljbyB5IHZpZW5lbiBsb3MgY29kaWdvcyBjb21vIHBvbmVyIFxuXG5gYGAifQ== -->
+<pre class="r"><code>
+Acidos &lt;- tidyverse::read_cvs(&quot;Material_clase/Acidos_ex.csv&quot;) #este no usarlo
+
+??tidyverse # Para dudas que tenga de los paquetes, sale todo que contenga la palabra
+
+
+?matrix # Para duda que tenga mas especifico y vienen los codigos como poner 
 </code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiRXJyb3I6ICdyZWFkX2N2cycgaXMgbm90IGFuIGV4cG9ydGVkIG9iamVjdCBmcm9tICduYW1lc3BhY2U6dGlkeXZlcnNlJ1xuIn0= -->
-<pre><code>Error: &#39;read_cvs&#39; is not an exported object from &#39;namespace:tidyverse&#39;</code></pre>
-<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
@@ -1956,23 +1971,13 @@ comandos los cuales usando un formato estandar piden un input para
 entregarle al usuario un output</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShjYXIpXG5cbmBgYCJ9 -->
-<pre class="r"><code>library(car)
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG5saWJyYXJ5KGNhcikgIyBMYSBpbnN0YWxhY2lvbiBzb2xvIGVzIHVuYSB2ZXogeSBjYXJnYXIgbGEgbGlicmVyaWEgZXMgY2FkYSBxdWUgYWJyYXMgUlN0dWRpb1xuXG4/QW5vdmFcblxuYGBgIn0= -->
+<pre class="r"><code>
+library(car) # La instalacion solo es una vez y cargar la libreria es cada que abras RStudio
+
+?Anova
 </code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiTG9hZGluZyByZXF1aXJlZCBwYWNrYWdlOiBjYXJEYXRhXG5cbkF0dGFjaGluZyBwYWNrYWdlOiDigJhjYXLigJlcblxuVGhlIGZvbGxvd2luZyBvYmplY3QgaXMgbWFza2VkIGZyb20g4oCYcGFja2FnZTpkcGx5cuKAmTpcblxuICAgIHJlY29kZVxuXG5UaGUgZm9sbG93aW5nIG9iamVjdCBpcyBtYXNrZWQgZnJvbSDigJhwYWNrYWdlOnB1cnJy4oCZOlxuXG4gICAgc29tZVxuIn0= -->
-<pre><code>Loading required package: carData
-
-Attaching package: ‘car’
-
-The following object is masked from ‘package:dplyr’:
-
-    recode
-
-The following object is masked from ‘package:purrr’:
-
-    some</code></pre>
-<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
