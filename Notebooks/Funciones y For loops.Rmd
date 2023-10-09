@@ -277,7 +277,143 @@ Desv <- rbind(Acidos,ac_ds)
 
 ```
 
+# Comando IF Else
 
+Los comandos If else en Rstudio son una parte fundamental de la programacion ya que la computadora es una
+
+
+```{r}
+# Estructura basica IF statement
+
+if (condicion_que_debe_Ser_verdad) {
+haz_algo
+}
+
+## Ejemplo con condiciones numericas 
+
+x <- 4
+
+if (x > 5) { # estos objetos si aparecen en ele ambiente global 
+  x <- x ^ 2 # si (IF) es falso no hace nada
+}
+
+# Ejemplo biologico
+
+veg_tipo <- "arbol"
+volumen <- 16
+
+if (veg_tipo == "arbol") { # cuadno pones solo un = es un operador matematico mientras que == significa es igual a 
+  masa <- 2.6 * volumen ^ 0.9 # este objeto si se guarda 
+}
+  
+```
+
+#### Ejercicio
+
+Como maestros de secundaria ustedes estan caificado unos examenes. Si el alumno tuvo mas de 70 aciertos en el examen pasa. Creen un _if statement_ que me arroje APROBADO dependiendo de la calificacion del alumno
+
+```{r}
+
+cal <- 89
+
+if (cal > 70) { 
+  print("Aprobado") 
+}
+
+```
+
+### Complicamos mas la cosa IF else statement
+
+Con el _if statement_ solo le decimos a la computadora si los datos que le fimos son ciertos si son falsos este compando simplemente no arroja nada por lo que le tenemos que agregar el _Else_
+
+
+```{r}
+x <- 6
+
+if (x < 5) {
+  x <- x ^ 2 
+} else { # ahora si (IF) es falso tambien le decios que hacer
+  print <- x ^ 3
+}
+
+
+veg_tipo <- "pasto"
+volumen <- 16
+
+if (veg_tipo == "arbol") { 
+  masa <- 2.6 * volumen ^ 0.9 # este objeto si se guarda 
+} else if (veg_tipo == "pasto") { # cadenita de condiciones
+  mass <- 0.6 * volumen ^ 1.2 
+} else { 
+  mass <- NA
+}
+  
+```
+
+### Ejercicio
+
+
+Como maestros de secundaria ustedes estan caificado unos examenes pero ahora a los alumnos que sacaron mas de 90 aciertos les van a poner EXCELENTE; si tuvieron entre 90 y 70 aciertos dira aprobado y menos de 70 reprobado. modifiquen su codigo para que arroje las 3 categorias dependiendo de la cal
+
+```{r}
+cal <- 92
+
+if (cal > 90) {
+  print ("Excelente")
+} else if (cal >70) {
+  print ("Aprobado")
+} else {
+  print ("Reprobado")
+}
+
+```
+## Version simplificada _ifelse_
+
+Se define por estar vectorizada por lo que en vez de tener las condiciones en renglones, todo esta condensado en una linea
+
+Es util cuando las comparaciones son mas sencillas e interesantemente se puede usar directamente con vectores en vez de valores simples
+
+```{r}
+# Estructura simplificada
+
+ifelse(condicion, respuesta_true, respuesta_false)
+
+#Ejemplo basico
+
+edad_planta <- 5
+
+ifelse(edad_planta <2, "Plantula", "Adulto")
+
+#ejemplo anidado
+
+ifelse(edad_planta < 2, "Plantula", ifelse (edad_planta < 7, "Juvenil", "Adulto"))
+       
+```
+### Ejercicio 
+
+El codigo previo que hicieron usando if else ahora convertirlo al comando ifelse
+
+```{r}
+cal <- 92
+
+ifelse(cal > 90, "Excelente", ifelse (cal > 70, "Aprobado", "Reprobado"))
+
+```
+### Aplicando Ifelse a vectores
+
+```{r}
+# vector de numeros
+
+a <- c(6,9,4,8)
+
+# checar si es par o impar
+
+ifelse(a %% 2 == 0, "Par", "Impar")
+
+# condicion %% 2 == 0, cuando divides entre 2 el residuo es cero , eso se indica
+
+```
+## mezclando estos comando con ejemplos reales
 
 
 

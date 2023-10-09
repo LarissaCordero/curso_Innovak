@@ -1,0 +1,163 @@
+---
+title: "Manipulacion datos"
+output: html_notebook
+---
+
+# Introduccion
+
+```{r}
+library(dplyr) # manipulacion de datos, funciones, modificar columnas, filtrar, reordenar, calculos, etc
+library(tidyr) # modificar las funciones de datos
+library(readr) # leer y ewscribir csvs
+library(udunits2) # conversion de unidades
+
+
+# Data
+
+Acidos <- read.csv("~/capR/curso/curso_Innovak/Material_clase/Acidos_ex.csv")
+
+Medidas_clase <- read.csv("~/capR/curso/curso_Innovak/Material_clase/Class-data.csv")
+
+Exud_metadata <- read.csv("~/capR/curso/curso_Innovak/Material_clase/Exud_metadata.csv")
+
+Tabla_plantas <- read.csv("~/capR/curso/curso_Innovak/Material_clase/Tabla_plantas.csv")
+
+Roeadores <- read.csv("~/capR/curso/curso_Innovak/Material_clase/Roedores.csv")
+
+rm(Desv)
+```
+
+# Modificacion de datos con R Base 
+
+Si bien el paquete mas comun (y util) para anipulat fyod rd tidyverse,R base tambien tiene varias funciones muy utiles para modificaciones basicas
+
+## Como checar la estructura de nuestros datos
+
+```{r}
+str(Medidas_clase) # estructura interna, tipo de cada variable y nombre de cada variable y nombre de las variables
+
+dim(Medidas_clase) #filas y columnas
+nrow(Medidas_clase) ; ncol(Medidas_clase) # separar comandos cortos ;
+
+head(Medidas_clase) # Imprime las medidas de una tabla
+
+```
+## Reordenar datos
+
+Si bien las ni las finalas ni las columnas no necesitas realmente un orden particular al momento de analizr los datos, muchas veces es conveniente visualmente
+
+```{r}
+# Reordenar columnas
+
+Medidas_clase <- Medidas_clase[,c(1,9,4,2,3,5,6,7,8)]
+
+### Ejercicio : reordenar nuevamente las columnas menos ID en orden alfabetico
+
+
+# Reordenar de mas a menos la tabla (filas)
+
+Acidos <- Acidos[order(Acidos[,2],decreasing = TRUE),]
+
+# reodernar de menos a mas
+
+Acidos <- Acidos[order(Acidos[,2],decreasing = FALSE),]
+
+```
+
+Asimismo muchas veces es conveniente cambiar filas a columnas y viceversa. Para ello tenemos el comando de _transpose()_
+
+```{r}
+# t() transpose
+
+Acidos <- as.data.frame(t(Acidos)) # tambien tenemos que especificar que tipo de objeto queremos como resultado (que siga como tabla)
+
+colnames(Acidos) <- Acidos[1,] # renombrar las columnas con el nombre de los acidos
+
+Acidos <- Acidos[-1,] # borrar fila 1
+
+```
+
+## Renombrar variables
+
+Otro comando util que tiene R es el de cambiar el nombre de variables dentro de nuestro date frame, a diferencia de excel en Rstudio uno no puede cambiar directamente los valores 
+
+```{r}
+
+Exud_metadata$Plant_type[Exud_metadata$Plant_type == "No Plant" ] <- "Bulk soil"
+
+Exud_metadata$Treatment[Exud_metadata$Treatment == "Pi"] <- "Fosfato"
+
+Exud_metadata$Treatment[Exud_metadata$Treatment == "Phi"] <- "Fosfito"
+
+
+```
+
+## Subset de datos
+
+A veces es necesario analizar los datos por separado por lo que es util seleccionar solo algunos de nuestros datos basados en una o mas variables
+
+```{r}
+
+# Seleccionar ciertas columnas
+
+Medidas_filt <- Medidas_clase[,c("ID", "Height.cm", "Sex")]
+
+# Basado en valores de las variables
+
+mujeres_alta <- Medidas_clase[which(Medidas_clase$Sex=="F" & Medidas_clase$Height.cm > 165),]
+
+### Ejercicio: Seleccionar hombres cabezones, es decir con la circunferencia mas de 60 cm
+
+hom_cabezon <- Medidas_clase[which(Medidas_clase$Sex=="M" & Medidas_clase$CircumferenceHead.com > 60),] 
+
+
+```
+
+
+Finalmente otra funcion que sera util mas adelante es cambiar de orden los factores, usualmente los factores dentro de una variable se ordenan y se muestras de forma alfabetica, sin embargo, esyos cambios no se van a ver hasta el momento de graficar
+
+```{r}
+
+Exud_metadata <- factor(Exud_metadata$Treatment, levels = c("Low P", "Fosfato", "Fosfito","Pi/Phi mix"), ordered = TRUE)
+```
+
+### Ejercicio
+
+Al data frame _PLantas_ hacer las siguientes modificaciones :
+
+1. Cambiar de orden las columnas para que TOC Y MBC sean las primeras vaiables que se ven despues de metadatos
+
+2. Reorganizar la tabla con las plantas con mayor masa foliar hasta arriba _roots_
+
+3. El tipo de planta renombrar No plant a Bulk soil y en tratamiento control a Pi
+
+4. Finalmente crear un nuevo data frame en el que seleccionen todas las plantas _wild type_ con _tip count_ menor a 100 
+
+```{r}
+
+1.
+
+Tabla_plantas <- Tabla_plantas[,c(1,2,3,4,5,15,16,6,7,8,9,10,11,12,13,14)]
+
+2.
+
+Tabla_plantas <- Tabla_plantas[order(Tabla_plantas[,8],decreasing = TRUE),]
+
+3.
+
+Tabla_plantas$Plant_Type[Tabla_plantas$Plant_Type == "No Plant"] <- "Bulk soil"
+Tabla_plantas$Treatment[Tabla_plantas$Treatment == "Control"] <- "Pi"
+
+4.
+
+Plant <- Tabla_plantas[which(Tabla_plantas$Plant_Type=="Wild Type" & Tabla_plantas$root_tip_count < 100),]
+
+```
+
+
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
