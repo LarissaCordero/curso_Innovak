@@ -1,0 +1,16 @@
+---
+title: "T student y sus variaciones"
+output: html_notebook
+---
+
+# Introduccion
+
+Prueba de hipotesis parametrica para comparar la media de una o dos poblaciones. Se usa cuando se tiene una variable dependiente y 1 variable independiente de 2 opciones
+
+```{r}
+po
+
+```
+
+
+

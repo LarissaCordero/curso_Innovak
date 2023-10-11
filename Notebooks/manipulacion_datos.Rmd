@@ -404,7 +404,7 @@ dir.create("Datos_procesados") # nuevo folder
 
 ## Crear un csv de un objeto de RStudio
 
-# R base
+# R base recomendado
 
 write.csv(Roedores_wide, "~/capR/curso/curso_Innovak/Roedores_gen_pesp.csv")
 
