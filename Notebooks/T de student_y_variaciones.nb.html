@@ -1759,6 +1759,14 @@ poblaciones. Se usa cuando se tiene una variable dependiente y 1
 variable independiente de 2 opciones</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudmlhYmlsaWRhZCA8LSByZWFkLmNzdihcIn4vY2FwUi9jdXJzby9jdXJzb19Jbm5vdmFrL01hdGVyaWFsX2NsYXNlL1ZpYWJpbGlkYWQuY3N2XCIpXG5cbmBgYCJ9 -->
+<pre class="r"><code>viabilidad &lt;- read.csv(&quot;~/capR/curso/curso_Innovak/Material_clase/Viabilidad.csv&quot;)
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiRXJyb3IgaW4gbWFrZS5uYW1lcyhjb2wubmFtZXMsIHVuaXF1ZSA9IFRSVUUpIDogXG4gIHN0cmluZyBtdWx0aWJ5dGUgMiBpbnbDoWxpZGFcbiJ9 -->
+<pre><code>Error in make.names(col.names, unique = TRUE) : 
+  string multibyte 2 inválida</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
@@ -1771,29 +1779,280 @@ especifico</p>
 <p><em>Analisis de gestion ambiental </em>Control de calidad</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudC50ZXN0KEZvc2YkVERQLCBtdSA9IDc1LjYpICMgbXUgdmFsb3IgZGUgcmVmZXJlbmNpYVxuXG5gYGAifQ== -->
-<pre class="r"><code>t.test(Fosf$TDP, mu = 75.6) # mu valor de referencia
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG50LnRlc3QobG9nKEZvc2YkVERQKSxtdSA9IGxvZyg3NS42KSkgIyBtdSB2YWxvciBkZSByZWZlcmVuY2lhLCBjb3JyZWdpZG8gY29uIGVsIGxvZ1xuXG5zaGFwaXJvLnRlc3QoRm9zZiRURFApXG5oaXN0KEZvc2YkVERQKVxucXFub3JtKEZvc2YkVERQKVxuXG5gYGAifQ== -->
+<pre class="r"><code>
+t.test(log(Fosf$TDP),mu = log(75.6)) # mu valor de referencia, corregido con el log
+
+shapiro.test(Fosf$TDP)
+hist(Fosf$TDP)
+qqnorm(Fosf$TDP)
 </code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiXG5cdE9uZSBTYW1wbGUgdC10ZXN0XG5cbmRhdGE6ICBGb3NmJFREUFxudCA9IC0yOS40MzMsIGRmID0gNDY5LCBwLXZhbHVlIDwgMi4yZS0xNlxuYWx0ZXJuYXRpdmUgaHlwb3RoZXNpczogdHJ1ZSBtZWFuIGlzIG5vdCBlcXVhbCB0byA3NS42XG45NSBwZXJjZW50IGNvbmZpZGVuY2UgaW50ZXJ2YWw6XG4gMjMuNzIyNzggMzAuMjE2MjJcbnNhbXBsZSBlc3RpbWF0ZXM6XG5tZWFuIG9mIHggXG4gIDI2Ljk2OTUgXG4ifQ== -->
-<pre><code>
-    One Sample t-test
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+<div id="prueba-t-pareada" class="section level1">
+<h1>Prueba T pareada</h1>
+<p>La prueba T pareada es un metodo que se usa para comprobar si la
+media entre pares de medias es o no igual a cero</p>
+<p><strong>Cuando usarla?</strong></p>
+<p>*Para pruebas de antes y despues (tienen que ser dos variables
+dependientes conectadas entre si)</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuI0NoZWNhciBub3JtYWxpZGFkIGVuIGxhIGRpZmVyZW5jaWEgIG5vIGVuIGVsIHNldCBkZSBkYXRvc1xuXG5EaWYgPC0gUHJvZnVuZGlkYWQkVGhhdy4yMDEwcyAtIFByb2Z1bmRpZGFkJFdhdGVyLjE5NzBzXG5cbnNoYXBpcm8udGVzdChEaWYpXG5cbnBhcihtZnJvdz1jKDEsMikpXG5oaXN0KERpZilcbnFxbm9ybShEaWYpXG5cbnQudGVzdChQcm9mdW5kaWRhZCRUaGF3LjE5NzBzLFByb2Z1bmRpZGFkJFRoYXcuMjAxMHMsXG4gICAgICAgYWx0ZXJuYXRpdmU9YyhcInR3by5zaWRlZFwiKSxcbiAgICAgICBtdT0wLHBhaXJlZD1UUlVFKVxuXG5gYGAifQ== -->
+<pre class="r"><code>#Checar normalidad en la diferencia  no en el set de datos
 
-data:  Fosf$TDP
-t = -29.433, df = 469, p-value &lt; 2.2e-16
-alternative hypothesis: true mean is not equal to 75.6
-95 percent confidence interval:
- 23.72278 30.21622
-sample estimates:
-mean of x 
-  26.9695 </code></pre>
+Dif &lt;- Profundidad$Thaw.2010s - Profundidad$Water.1970s
+
+shapiro.test(Dif)
+
+par(mfrow=c(1,2))
+hist(Dif)
+qqnorm(Dif)
+
+t.test(Profundidad$Thaw.1970s,Profundidad$Thaw.2010s,
+       alternative=c(&quot;two.sided&quot;),
+       mu=0,paired=TRUE)
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<div id="ejercicio" class="section level2">
+<h2>Ejercicio</h2>
+<p>Encontrar o crear un mini set de datos que podria ser analizado una
+prueba de t pareada. Realizar el test y concluir si existe o no
+difetencia estadistica</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG5EaWZlIDwtIHZpYWJpbGlkYWQkQ2l0b21ldHJpYSAtIHZpYWJpbGlkYWQkU2llbWJyYWVucGxhY2Fcblxuc2hhcGlyby50ZXN0KERpZmUpXG5cbnBhcihtZnJvdz1jKDEsMikpXG5oaXN0KERpZmUpXG5xcW5vcm0oRGlmZSlcblxudC50ZXN0IChsb2codmlhYmlsaWRhZCRDaXRvbWV0cmlhKSxcbiAgICAgICAgbG9nKHZpYWJpbGlkYWQkU2llbWJyYWVucGxhY2EpLFxuICAgICAgICBhbHRlcm5hdGl2ZT1jKFwidHdvLnNpZGVkXCIpLFxuICAgICAgICBtdT0wLHBhaXJlZD1UUlVFKVxuICAgICAgIFxuYGBgIn0= -->
+<pre class="r"><code>
+Dife &lt;- viabilidad$Citometria - viabilidad$Siembraenplaca
+
+shapiro.test(Dife)
+
+par(mfrow=c(1,2))
+hist(Dife)
+qqnorm(Dife)
+
+t.test (log(viabilidad$Citometria),
+        log(viabilidad$Siembraenplaca),
+        alternative=c(&quot;two.sided&quot;),
+        mu=0,paired=TRUE)
+       </code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+</div>
+<div id="prueba-t-para-dos-muestras" class="section level1">
+<h1>Prueba T para dos muestras</h1>
+<p>Esta es la mas comun o la mas conocida(tambien llamada prueba t de
+muestras independientes) es un metodo utilizado para probar si las
+medias de poblacion desconocidas de dos grupos son iguales o no</p>
+<p>De este tipo de prueba hay dos variables la T de student y el test
+Welch´s (no asume varianzas iguales)</p>
+<p><strong>¿Como usarla?</strong></p>
+<p>Comparar dos grupos diferentes en relacion con una vaiable
+dependiente:</p>
+<p>Biomasa de UNA especie planta en dos regimenes diferntes de
+crecimiento</p>
+<p>*Concentracion de metales pesados entre dos campos de cultivo</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG4jIEVzdHIodWN0dXJhOiAodmFyaWFibGUgZGVwIH4gdmFyaWFibGUgaW5kZXAsIGRhdGE9IHRhYmxhKVxuXG50LnRlc3QoRE9DIH4gSGFiaXRhdCwgZGF0YSA9IERvYykgIyBkYXRhIGVzIGVsIG5vbWJyZSBkZWwgYXJjaGl2byBcblxuXG5cblxuXG5gYGAifQ== -->
+<pre class="r"><code>
+# Estr(uctura: (variable dep ~ variable indep, data= tabla)
+
+t.test(DOC ~ Habitat, data = Doc) # data es el nombre del archivo 
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Como pueden observar la estructura del codigo de estas pruebas no es
+tan complicada como todo el codigo previo que ya hemos hecho. Sin
+embargo lo complicado a partir de aquies usar criterio para ver cual de
+tpdas las pruebas se debe usar para analizar los datos que tengas</p>
+<div id="ejercicio-1" class="section level2">
+<h2>EjERCICIO</h2>
+<p>Usando el data frame caldad de agua comparar DOC(ppm), forfoeo,
+reactivo soluble (SRP; ug/L) y clorofila en fitoplancton (ug/L) EN
+ESTANQUES DE Alaska entre los años 1970 y 2000</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIzFcbnNoYXBpcm8udGVzdChDYWxpZGFkX2FndWEkU1JQKVxuXG5wYXIobWZyb3c9YygxLDIpKVxuaGlzdChDYWxpZGFkX2FndWEkU1JQKVxucXFub3JtKENhbGlkYWRfYWd1YSRTUlApXG5cbiMgRXN0cnVjdHVyYTogKHZhcmlhYmxlIGRlcCB+IHZhcmlhYmxlIGluZGVwLCBkYXRhPSB0YWJsYSlcblxudC50ZXN0KGxvZyhTUlApIH4gRXJhLCBkYXRhID0gQ2FsaWRhZF9hZ3VhKSAjIGRhdGEgZXMgZWwgbm9tYnJlIGRlbCBhcmNoaXZvXG5cbiMgMlxuc2hhcGlyby50ZXN0KENhbGlkYWRfYWd1YSRQaHl0bylcblxucGFyKG1mcm93PWMoMSwyKSlcbmhpc3QoQ2FsaWRhZF9hZ3VhJFBoeXRvKVxucXFub3JtKENhbGlkYWRfYWd1YSRQaHl0bylcblxudC50ZXN0KGxvZyhQaHl0bykgfiBFcmEsIGRhdGEgPSBDYWxpZGFkX2FndWEpIFxuXG4jIDNcbnNoYXBpcm8udGVzdChDYWxpZGFkX2FndWEkRE9DMSlcblxucGFyKG1mcm93PWMoMSwyKSlcbmhpc3QoQ2FsaWRhZF9hZ3VhJERPQzEpXG5xcW5vcm0oQ2FsaWRhZF9hZ3VhJERPQzEpXG5cbnQudGVzdChET0MxIH4gRXJhLCBkYXRhID0gQ2FsaWRhZF9hZ3VhKSBcblxuXG5gYGAifQ== -->
+<pre class="r"><code>#1
+shapiro.test(Calidad_agua$SRP)
+
+par(mfrow=c(1,2))
+hist(Calidad_agua$SRP)
+qqnorm(Calidad_agua$SRP)
+
+# Estructura: (variable dep ~ variable indep, data= tabla)
+
+t.test(log(SRP) ~ Era, data = Calidad_agua) # data es el nombre del archivo
+
+# 2
+shapiro.test(Calidad_agua$Phyto)
+
+par(mfrow=c(1,2))
+hist(Calidad_agua$Phyto)
+qqnorm(Calidad_agua$Phyto)
+
+t.test(log(Phyto) ~ Era, data = Calidad_agua) 
+
+# 3
+shapiro.test(Calidad_agua$DOC1)
+
+par(mfrow=c(1,2))
+hist(Calidad_agua$DOC1)
+qqnorm(Calidad_agua$DOC1)
+
+t.test(DOC1 ~ Era, data = Calidad_agua) 
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+</div>
+<div id="introduccion-1" class="section level1">
+<h1>Introduccion</h1>
+<p>A un nivel mayor de complejidad que las pruebas de t de anova
+(analysis of variance) es una formula estadistica que se utiliza para
+comparar varianzas entre las medias de diferentes (mas de dos
+grupos)</p>
+<p>Existe el ANOVA de una via en la que solo se tiene una variable
+independiente (con varios grupos) y se quiere ver la diferencia entre
+dicho grupos sobre una variables dependiente como ejemplo el
+tratamiento</p>
+<p>El ANOVA 2 VIAS añade otra variable indepenediente por lo que mide el
+efecto de dos variables independientes sobra una variable dependiente.
+Tambien existe la ANOVA de tres vias pero la complejidad en
+comparaciones y tratamientos crece bastante ejemplo: var. independiente
+(tipo de planta y crecimiento) , var depend (Crecimiento de la
+planta)</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShjYXIpXG5cbmBgYCJ9 -->
+<pre class="r"><code>library(car)
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiTG9hZGluZyByZXF1aXJlZCBwYWNrYWdlOiBjYXJEYXRhXG5cbkF0dGFjaGluZyBwYWNrYWdlOiDigJhjYXLigJlcblxuVGhlIGZvbGxvd2luZyBvYmplY3QgaXMgbWFza2VkIGZyb20g4oCYcGFja2FnZTpwdXJycuKAmTpcblxuICAgIHNvbWVcblxuVGhlIGZvbGxvd2luZyBvYmplY3QgaXMgbWFza2VkIGZyb20g4oCYcGFja2FnZTpkcGx5cuKAmTpcblxuICAgIHJlY29kZVxuIn0= -->
+<pre><code>Loading required package: carData
+
+Attaching package: ‘car’
+
+The following object is masked from ‘package:purrr’:
+
+    some
+
+The following object is masked from ‘package:dplyr’:
+
+    recode</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+<div id="anova-de-una-via" class="section level1">
+<h1>Anova de una via</h1>
+<p>Es decir solo un tratamiento independiente</p>
+</div>
+<div id="anova-en-r" class="section level1">
+<h1>Anova en R</h1>
+<p>R base puede calcular anova de dos maneras diferentes, una de ellas
+usando el codigo <em>anova()</em> . Sin embargo, esta funcion base se
+calcula automaticamente una ANOVA tipo 1 la cual da por sentado que los
+datos son balanceados por lo que cuando no sea asi se debe de usar la
+funcion del paquete <em>car</em></p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG4jIHZhcmlhYmxlIGRlcGVuZGllbnRlIH4gdmFyaWFibGUgaW5kZXAsIGRhdG9zXG5cbnN1bW1hcnkoYW92KHNoaWZ0fnRyZWF0bWVudCwgZGF0YSA9Um9kaWxsYXMpKVxuXG5hbm92YShsbShzaGlmdH50cmVhdG1lbnQsIGRhdGEgPSBSb2RpbGxhcykpICMgdXNhciBkZSBwcmVmZXJlbmNpYSBlc3RlXG5cblxuYGBgIn0= -->
+<pre class="r"><code>
+# variable dependiente ~ variable indep, datos
+
+summary(aov(shift~treatment, data =Rodillas))
+
+anova(lm(shift~treatment, data = Rodillas)) # usar de preferencia este
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>La diferencia rntre lm y aov es el tipo de modelo y mas que nada las
+presentacion de los datos, si quieren saber mas al respecto</p>
+<p>(lm vs. aov)[ <a href="https://www.oreilly.com/library/view/the-r-book/9780470510247/ch011-sec015.html" class="uri">https://www.oreilly.com/library/view/the-r-book/9780470510247/ch011-sec015.html</a>]</p>
+<p>Sin embrgo para fines utiles yo uso aov() ya que por definicion
+significa analisis de vatianza</p>
+</div>
+<div id="anova-con-el-paquete-car" class="section level1">
+<h1>Anova con el paquete car</h1>
+<p>Este paquete esta enfocado a varios tipos de analisis estadisticos y
+su funcion de ANOVA tiene un argumento para lidiar con datos
+desbalanceados (Tipo II y III). Ademas que este paquete tambien cuenta
+con la funcion levene para checar igualdad de varianzas.</p>
+<p><a href="https://www.r-bloggers.com/2011/03/anova-%E2%80%93-type-iiiiii-ss-explained/">Tipos
+de ANOVA</a></p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyMgUmV2aXNhciBwb3IgaG9tb2dlbmVpZGFkIGRlIHZhcmlhbnphc1xuXG5sZXZlbmVUZXN0KHNoaWZ0fnRyZWF0bWVudCwgZGF0YSA9IFJvZGlsbGFzKSAjIG1heW9yIGEgMC4wNSBlcyBub3JtYWwgcXVpZXJlIGRlY2lyIHF1ZSBoYXkgaG9tb2dlbmVpZGFkIGxldmVuZS50ZXN0IG5vIGZ1bmNpb25hXG5cbnBsb3Qocm9kX2Fub3ZhLDEpICMgSW50ZXJwcmV0YWNpb246IGxvcyByZXNpZHVhbGVzIHRpZW5lbiBxdWUgZXN0YXIgZGlzdHJpYnVpZG9zIGRlIG1hbmVyYSBhbGVhdG9yaWEgeSB0aWVuZW4gdmFyaWFuemEgY29uc3RhbnRlLCBjYXNpIG5vIHNlIG9jdXBhXG5cbiMjIEFOT1ZBXG5cbnJvZF9hbm92YSA8LSBhb3Yoc2hpZnR+dHJlYXRtZW50LCBkYXRhID0gUm9kaWxsYXMpICMgc2UgcHVlZGUgdXNhciBsbSBvIGFvdlxuXG5Bbm92YShyb2RfYW5vdmEpICMgZmlqZW5zZSBxdWUgdmEgY29uIG1heXVzY3VsYVxuXG4jIGF1dG9tYXRpY2FtZW50ZSBkYSBlbCB0aXBvIElJXG5cbiMjIEFub3ZhIHRpcG8gSUlJXG5cbkFub3ZhKHJvZF9hbm92YSwgdHlwZT0zKSAjIGVzdGUgbm8gZXJhIGNvcnJlY3RvIGNvcnJlciBwYXJhIGVzdGUgc2V0IGRlIGRhdG9zXG5cblxuYGBgIn0= -->
+<pre class="r"><code>## Revisar por homogeneidad de varianzas
+
+leveneTest(shift~treatment, data = Rodillas) # mayor a 0.05 es normal quiere decir que hay homogeneidad levene.test no funciona
+
+plot(rod_anova,1) # Interpretacion: los residuales tienen que estar distribuidos de manera aleatoria y tienen varianza constante, casi no se ocupa
+
+## ANOVA
+
+rod_anova &lt;- aov(shift~treatment, data = Rodillas) # se puede usar lm o aov
+
+Anova(rod_anova) # fijense que va con mayuscula
+
+# automaticamente da el tipo II
+
+## Anova tipo III
+
+Anova(rod_anova, type=3) # este no era correcto correr para este set de datos
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>La diferencia principal entre el tipo 2 y 3 es la interaccion de las
+variables independientes. yo les recomiendo que usen tipo 2 si no estan
+seguros si sus variables interactuan entre si.</p>
+<p><em>Conclusion:</em> si p&lt;0.05 entonces si hay diferencia
+significativa entre mis grupos</p>
+</div>
+<div id="tukey-hsd" class="section level1">
+<h1>Tukey HSD</h1>
+<p>En caso que una ANOVA nos muestre que existen diferencias
+significativas entre tratamientos, el paso siguiente es correr un test
+the tukey HSD en el cual nos deglosa la ANOVA y nos dice cuales de los
+tratamientos son diferentes</p>
+<p><em>Conclusion</em>: donde p &lt;.05</p>
+<p>Para esto solo hay un codigo el cual es <em>TukeyHSD()</em></p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuVHVrZXlIU0QoYW92KHNoaWZ0fnRyZWF0bWVudCwgZGF0YSA9IFJvZGlsbGFzKSlcblxuYGBgIn0= -->
+<pre class="r"><code>TukeyHSD(aov(shift~treatment, data = Rodillas))
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiICBUdWtleSBtdWx0aXBsZSBjb21wYXJpc29ucyBvZiBtZWFuc1xuICAgIDk1JSBmYW1pbHktd2lzZSBjb25maWRlbmNlIGxldmVsXG5cbkZpdDogYW92KGZvcm11bGEgPSBzaGlmdCB+IHRyZWF0bWVudCwgZGF0YSA9IFJvZGlsbGFzKVxuXG4kdHJlYXRtZW50XG4gICAgICAgICAgICAgICAgICAgIGRpZmYgICAgICAgIGx3ciAgICAgICAgdXByICAgICBwIGFkalxuZXllcy1jb250cm9sIC0xLjI0MjY3ODU3IC0yLjE2ODIzNjQgLTAuMzE3MTIwNyAwLjAwNzg2NTZcbmtuZWUtY29udHJvbCAtMC4wMjY5NjQyOSAtMC45NTI1MjIyICAwLjg5ODU5MzYgMC45OTY5ODUxXG5rbmVlLWV5ZXMgICAgIDEuMjE1NzE0MjkgIDAuMjU5ODAyMiAgMi4xNzE2MjYzIDAuMDExNjc3NlxuIn0= -->
+<pre><code>  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = shift ~ treatment, data = Rodillas)
+
+$treatment
+                    diff        lwr        upr     p adj
+eyes-control -1.24267857 -2.1682364 -0.3171207 0.0078656
+knee-control -0.02696429 -0.9525222  0.8985936 0.9969851
+knee-eyes     1.21571429  0.2598022  2.1716263 0.0116776</code></pre>
 <!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 </div>
 
-<div id="rmd-source-code">LS0tDQp0aXRsZTogIlQgc3R1ZGVudCB5IHN1cyB2YXJpYWNpb25lcyINCm91dHB1dDogaHRtbF9ub3RlYm9vaw0KLS0tDQoNCiMgSW50cm9kdWNjaW9uDQoNClBydWViYSBkZSBoaXBvdGVzaXMgcGFyYW1ldHJpY2EgcGFyYSBjb21wYXJhciBsYSBtZWRpYSBkZSB1bmEgbyBkb3MgcG9ibGFjaW9uZXMuIFNlIHVzYSBjdWFuZG8gc2UgdGllbmUgdW5hIHZhcmlhYmxlIGRlcGVuZGllbnRlIHkgMSB2YXJpYWJsZSBpbmRlcGVuZGllbnRlIGRlIDIgb3BjaW9uZXMNCg0KYGBge3J9DQojIERhdGENCg0KRm9zZiA8LSByZWFkLmNzdigifi9jYXBSL2N1cnNvL2N1cnNvX0lubm92YWsvTWF0ZXJpYWxfY2xhc2UvcGhvc3Bob3J1cy5jc3YiKQ0KDQpQcm9mdW5kaWRhZA0KDQpEb2MNCg0KQ2FsaWRhZCBkZSBhZ3VhDQoNCg0KYGBgDQoNCiMgUHJ1ZWJhIGRlIFQgZGUgdW5hIG11ZXN0cmENCg0KVGVzdCBkZSBoaXBvdGVzaXMgZXN0YWRpc3RpY2EgcGFyYSBjb21wYXJhciBsYSBkaWZlcmVuY2lhIHNpZ25pZmljYXRpdmEgZW50cmUgdW5hIHBvYmxhY2lvbiAodHUgdmFyaWFibGUpIHkgdW4gdmFsb3IgZXNwZWNpZmljbw0KDQpfX0N1YW5kbyB1c2FybGE/X18NCg0KKkFuYWxpc2lzIGRlIGdlc3Rpb24gYW1iaWVudGFsDQoqQ29udHJvbCBkZSBjYWxpZGFkDQoNCmBgYHtyfQ0KdC50ZXN0KEZvc2YkVERQLCBtdSA9IDc1LjYpICMgbXUgdmFsb3IgZGUgcmVmZXJlbmNpYQ0KDQoNCmBgYA0KDQoNCg0KDQo=</div>
+<div id="rmd-source-code">LS0tDQp0aXRsZTogIlQgc3R1ZGVudCB5IHN1cyB2YXJpYWNpb25lcyINCm91dHB1dDogaHRtbF9ub3RlYm9vaw0KLS0tDQoNCiMgSW50cm9kdWNjaW9uDQoNClBydWViYSBkZSBoaXBvdGVzaXMgcGFyYW1ldHJpY2EgcGFyYSBjb21wYXJhciBsYSBtZWRpYSBkZSB1bmEgbyBkb3MgcG9ibGFjaW9uZXMuIFNlIHVzYSBjdWFuZG8gc2UgdGllbmUgdW5hIHZhcmlhYmxlIGRlcGVuZGllbnRlIHkgMSB2YXJpYWJsZSBpbmRlcGVuZGllbnRlIGRlIDIgb3BjaW9uZXMNCg0KYGBge3J9DQojIERhdGENCg0KRm9zZiA8LSByZWFkLmNzdigifi9jYXBSL2N1cnNvL2N1cnNvX0lubm92YWsvTWF0ZXJpYWxfY2xhc2UvcGhvc3Bob3J1cy5jc3YiKQ0KDQpQcm9mdW5kaWRhZCA8LSByZWFkLmNzdigifi9jYXBSL2N1cnNvL2N1cnNvX0lubm92YWsvTWF0ZXJpYWxfY2xhc2UvSUJQSi5UaGF3LmNzdiIpDQoNCkRvYyA8LSByZWFkLmNzdigifi9jYXBSL2N1cnNvL2N1cnNvX0lubm92YWsvTWF0ZXJpYWxfY2xhc2UvUG9uZC5MYWtlLkRPQy5jc3YiKQ0KDQpDYWxpZGFkX2FndWEgPC0gcmVhZC5jc3YoIn4vY2FwUi9jdXJzby9jdXJzb19Jbm5vdmFrL01hdGVyaWFsX2NsYXNlL1dRLkF1Z3VzdC5jc3YiKQ0KDQp2aWFiaWxpZGFkIDwtIHJlYWQuY3N2KCJ+L2NhcFIvY3Vyc28vY3Vyc29fSW5ub3Zhay9NYXRlcmlhbF9jbGFzZS9WaWFiaWxpZGFkLmNzdiIpDQoNCmBgYA0KDQojIFBydWViYSBkZSBUIGRlIHVuYSBtdWVzdHJhDQoNClRlc3QgZGUgaGlwb3Rlc2lzIGVzdGFkaXN0aWNhIHBhcmEgY29tcGFyYXIgbGEgZGlmZXJlbmNpYSBzaWduaWZpY2F0aXZhIGVudHJlIHVuYSBwb2JsYWNpb24gKHR1IHZhcmlhYmxlKSB5IHVuIHZhbG9yIGVzcGVjaWZpY28NCg0KX19DdWFuZG8gdXNhcmxhP19fDQoNCipBbmFsaXNpcyBkZSBnZXN0aW9uIGFtYmllbnRhbA0KKkNvbnRyb2wgZGUgY2FsaWRhZA0KDQpgYGB7cn0NCg0KdC50ZXN0KGxvZyhGb3NmJFREUCksbXUgPSBsb2coNzUuNikpICMgbXUgdmFsb3IgZGUgcmVmZXJlbmNpYSwgY29ycmVnaWRvIGNvbiBlbCBsb2cNCg0Kc2hhcGlyby50ZXN0KEZvc2YkVERQKQ0KaGlzdChGb3NmJFREUCkNCnFxbm9ybShGb3NmJFREUCkNCg0KYGBgDQojIFBydWViYSBUIHBhcmVhZGENCg0KTGEgcHJ1ZWJhIFQgcGFyZWFkYSBlcyB1biBtZXRvZG8gcXVlIHNlIHVzYSBwYXJhIGNvbXByb2JhciBzaSBsYSBtZWRpYSBlbnRyZSBwYXJlcyBkZSBtZWRpYXMgZXMgbyBubyBpZ3VhbCBhIGNlcm8gDQoNCl9fQ3VhbmRvIHVzYXJsYT9fXw0KDQoqUGFyYSBwcnVlYmFzIGRlIGFudGVzIHkgZGVzcHVlcyAodGllbmVuIHF1ZSBzZXIgZG9zIHZhcmlhYmxlcyBkZXBlbmRpZW50ZXMgY29uZWN0YWRhcyBlbnRyZSBzaSkNCg0KYGBge3J9DQojQ2hlY2FyIG5vcm1hbGlkYWQgZW4gbGEgZGlmZXJlbmNpYSAgbm8gZW4gZWwgc2V0IGRlIGRhdG9zDQoNCkRpZiA8LSBQcm9mdW5kaWRhZCRUaGF3LjIwMTBzIC0gUHJvZnVuZGlkYWQkV2F0ZXIuMTk3MHMNCg0Kc2hhcGlyby50ZXN0KERpZikNCg0KcGFyKG1mcm93PWMoMSwyKSkNCmhpc3QoRGlmKQ0KcXFub3JtKERpZikNCg0KdC50ZXN0KFByb2Z1bmRpZGFkJFRoYXcuMTk3MHMsUHJvZnVuZGlkYWQkVGhhdy4yMDEwcywNCiAgICAgICBhbHRlcm5hdGl2ZT1jKCJ0d28uc2lkZWQiKSwNCiAgICAgICBtdT0wLHBhaXJlZD1UUlVFKQ0KDQpgYGANCiMjIEVqZXJjaWNpbw0KDQpFbmNvbnRyYXIgbyBjcmVhciB1biBtaW5pIHNldCBkZSBkYXRvcyBxdWUgcG9kcmlhIHNlciBhbmFsaXphZG8gdW5hIHBydWViYSBkZSB0IHBhcmVhZGEuIFJlYWxpemFyIGVsIHRlc3QgeSBjb25jbHVpciBzaSBleGlzdGUgbyBubyBkaWZldGVuY2lhIGVzdGFkaXN0aWNhDQoNCg0KYGBge3J9DQoNCkRpZmUgPC0gdmlhYmlsaWRhZCRDaXRvbWV0cmlhIC0gdmlhYmlsaWRhZCRTaWVtYnJhZW5wbGFjYQ0KDQpzaGFwaXJvLnRlc3QoRGlmZSkNCg0KcGFyKG1mcm93PWMoMSwyKSkNCmhpc3QoRGlmZSkNCnFxbm9ybShEaWZlKQ0KDQp0LnRlc3QgKGxvZyh2aWFiaWxpZGFkJENpdG9tZXRyaWEpLA0KICAgICAgICBsb2codmlhYmlsaWRhZCRTaWVtYnJhZW5wbGFjYSksDQogICAgICAgIGFsdGVybmF0aXZlPWMoInR3by5zaWRlZCIpLA0KICAgICAgICBtdT0wLHBhaXJlZD1UUlVFKQ0KICAgICAgIA0KYGBgDQoNCiMgUHJ1ZWJhIFQgcGFyYSBkb3MgbXVlc3RyYXMNCg0KRXN0YSBlcyBsYSBtYXMgY29tdW4gbyBsYSBtYXMgY29ub2NpZGEodGFtYmllbiBsbGFtYWRhIHBydWViYSB0IGRlIG11ZXN0cmFzIGluZGVwZW5kaWVudGVzKSBlcyB1biBtZXRvZG8gdXRpbGl6YWRvIHBhcmEgcHJvYmFyIHNpIGxhcyBtZWRpYXMgZGUgcG9ibGFjaW9uIGRlc2Nvbm9jaWRhcyBkZSBkb3MgZ3J1cG9zIHNvbiBpZ3VhbGVzIG8gbm8NCg0KRGUgZXN0ZSB0aXBvIGRlIHBydWViYSBoYXkgZG9zIHZhcmlhYmxlcyBsYSBUIGRlIHN0dWRlbnQgeSBlbCB0ZXN0IFdlbGNowrRzIChubyBhc3VtZSB2YXJpYW56YXMgaWd1YWxlcykNCg0KX1/Cv0NvbW8gdXNhcmxhP19fDQoNCkNvbXBhcmFyIGRvcyBncnVwb3MgZGlmZXJlbnRlcyBlbiByZWxhY2lvbiBjb24gdW5hIHZhaWFibGUgZGVwZW5kaWVudGU6DQoNCkJpb21hc2EgZGUgVU5BIGVzcGVjaWUgcGxhbnRhIGVuIGRvcyByZWdpbWVuZXMgZGlmZXJudGVzIGRlIGNyZWNpbWllbnRvDQoNCipDb25jZW50cmFjaW9uIGRlIG1ldGFsZXMgcGVzYWRvcyBlbnRyZSBkb3MgY2FtcG9zIGRlIGN1bHRpdm8NCg0KDQpgYGB7cn0NCg0KIyBFc3RyKHVjdHVyYTogKHZhcmlhYmxlIGRlcCB+IHZhcmlhYmxlIGluZGVwLCBkYXRhPSB0YWJsYSkNCg0KdC50ZXN0KERPQyB+IEhhYml0YXQsIGRhdGEgPSBEb2MpICMgZGF0YSBlcyBlbCBub21icmUgZGVsIGFyY2hpdm8gDQoNCg0KDQoNCg0KYGBgDQoNCkNvbW8gcHVlZGVuIG9ic2VydmFyIGxhIGVzdHJ1Y3R1cmEgZGVsIGNvZGlnbyBkZSBlc3RhcyBwcnVlYmFzIG5vIGVzIHRhbiBjb21wbGljYWRhIGNvbW8gdG9kbyBlbCBjb2RpZ28gcHJldmlvIHF1ZSB5YSBoZW1vcyBoZWNoby4gU2luIGVtYmFyZ28gbG8gY29tcGxpY2FkbyBhIHBhcnRpciBkZSBhcXVpZXMgdXNhciBjcml0ZXJpbyBwYXJhIHZlciBjdWFsIGRlIHRwZGFzIGxhcyBwcnVlYmFzIHNlIGRlYmUgdXNhciBwYXJhIGFuYWxpemFyIGxvcyBkYXRvcyBxdWUgdGVuZ2FzDQoNCiMjIEVqRVJDSUNJTw0KDQpVc2FuZG8gZWwgZGF0YSBmcmFtZSBjYWxkYWQgZGUgYWd1YSBjb21wYXJhciBET0MocHBtKSwgZm9yZm9lbywgcmVhY3Rpdm8gc29sdWJsZSAoU1JQOyB1Zy9MKSB5IGNsb3JvZmlsYSBlbiBmaXRvcGxhbmN0b24gKHVnL0wpIEVOIEVTVEFOUVVFUyBERSBBbGFza2EgZW50cmUgbG9zIGHDsW9zIDE5NzAgeSAyMDAwDQoNCmBgYHtyfQ0KIzENCnNoYXBpcm8udGVzdChDYWxpZGFkX2FndWEkU1JQKQ0KDQpwYXIobWZyb3c9YygxLDIpKQ0KaGlzdChDYWxpZGFkX2FndWEkU1JQKQ0KcXFub3JtKENhbGlkYWRfYWd1YSRTUlApDQoNCiMgRXN0cnVjdHVyYTogKHZhcmlhYmxlIGRlcCB+IHZhcmlhYmxlIGluZGVwLCBkYXRhPSB0YWJsYSkNCg0KdC50ZXN0KGxvZyhTUlApIH4gRXJhLCBkYXRhID0gQ2FsaWRhZF9hZ3VhKSAjIGRhdGEgZXMgZWwgbm9tYnJlIGRlbCBhcmNoaXZvDQoNCiMgMg0Kc2hhcGlyby50ZXN0KENhbGlkYWRfYWd1YSRQaHl0bykNCg0KcGFyKG1mcm93PWMoMSwyKSkNCmhpc3QoQ2FsaWRhZF9hZ3VhJFBoeXRvKQ0KcXFub3JtKENhbGlkYWRfYWd1YSRQaHl0bykNCg0KdC50ZXN0KGxvZyhQaHl0bykgfiBFcmEsIGRhdGEgPSBDYWxpZGFkX2FndWEpIA0KDQojIDMNCnNoYXBpcm8udGVzdChDYWxpZGFkX2FndWEkRE9DMSkNCg0KcGFyKG1mcm93PWMoMSwyKSkNCmhpc3QoQ2FsaWRhZF9hZ3VhJERPQzEpDQpxcW5vcm0oQ2FsaWRhZF9hZ3VhJERPQzEpDQoNCnQudGVzdChET0MxIH4gRXJhLCBkYXRhID0gQ2FsaWRhZF9hZ3VhKSANCg0KDQpgYGANCg0KIyBJbnRyb2R1Y2Npb24NCg0KQSB1biBuaXZlbCBtYXlvciBkZSBjb21wbGVqaWRhZCBxdWUgbGFzIHBydWViYXMgZGUgdCBkZSBhbm92YSAoYW5hbHlzaXMgb2YgdmFyaWFuY2UpIGVzIHVuYSBmb3JtdWxhIGVzdGFkaXN0aWNhIHF1ZSBzZSB1dGlsaXphIHBhcmEgY29tcGFyYXIgdmFyaWFuemFzIGVudHJlIGxhcyBtZWRpYXMgZGUgZGlmZXJlbnRlcyAobWFzIGRlIGRvcyBncnVwb3MpDQoNCkV4aXN0ZSBlbCBBTk9WQSBkZSB1bmEgdmlhIGVuIGxhIHF1ZSBzb2xvIHNlIHRpZW5lIHVuYSB2YXJpYWJsZSBpbmRlcGVuZGllbnRlIChjb24gdmFyaW9zIGdydXBvcykgeSBzZSBxdWllcmUgdmVyIGxhIGRpZmVyZW5jaWEgZW50cmUgZGljaG8gZ3J1cG9zIHNvYnJlIHVuYSB2YXJpYWJsZXMgZGVwZW5kaWVudGUgY29tbyBlamVtcGxvIGVsIHRyYXRhbWllbnRvDQoNCkVsIEFOT1ZBIDIgVklBUyBhw7FhZGUgb3RyYSB2YXJpYWJsZSBpbmRlcGVuZWRpZW50ZSBwb3IgbG8gcXVlIG1pZGUgZWwgZWZlY3RvIGRlIGRvcyB2YXJpYWJsZXMgaW5kZXBlbmRpZW50ZXMgc29icmEgdW5hIHZhcmlhYmxlIGRlcGVuZGllbnRlLiBUYW1iaWVuIGV4aXN0ZSBsYSBBTk9WQSBkZSB0cmVzIHZpYXMgcGVybyBsYSBjb21wbGVqaWRhZCBlbiBjb21wYXJhY2lvbmVzIHkgdHJhdGFtaWVudG9zIGNyZWNlIGJhc3RhbnRlDQplamVtcGxvOiB2YXIuIGluZGVwZW5kaWVudGUgKHRpcG8gZGUgcGxhbnRhIHkgY3JlY2ltaWVudG8pICwgdmFyIGRlcGVuZCAoQ3JlY2ltaWVudG8gZGUgbGEgcGxhbnRhKQ0KDQoNCmBgYHtyfQ0KIyBMaWJyYXJ5DQoNCmxpYnJhcnkoZHBseXIpDQpsaWJyYXJ5KHRpZHl2ZXJzZSkNCmxpYnJhcnkoY2FyKQ0KDQojIERhdGEgDQpSb2RpbGxhcyA8LSByZWFkLmNzdigifi9jYXBSL2N1cnNvL2N1cnNvX0lubm92YWsvTWF0ZXJpYWxfY2xhc2UvUm9kaWxsYXMuY3N2IikNCg0KYGBgDQoNCiMgQW5vdmEgZGUgdW5hIHZpYQ0KIA0KRXMgZGVjaXIgc29sbyB1biB0cmF0YW1pZW50byBpbmRlcGVuZGllbnRlDQogDQojIEFub3ZhIGVuIFINCg0KUiBiYXNlIHB1ZWRlIGNhbGN1bGFyIGFub3ZhIGRlIGRvcyBtYW5lcmFzIGRpZmVyZW50ZXMsIHVuYSBkZSBlbGxhcyB1c2FuZG8gZWwgY29kaWdvIF9hbm92YSgpXyAuIFNpbiBlbWJhcmdvLCBlc3RhIGZ1bmNpb24gYmFzZSBzZSBjYWxjdWxhIGF1dG9tYXRpY2FtZW50ZSB1bmEgQU5PVkEgdGlwbyAxIGxhIGN1YWwgZGEgcG9yIHNlbnRhZG8gcXVlIGxvcyBkYXRvcyBzb24gYmFsYW5jZWFkb3MgcG9yIGxvIHF1ZSBjdWFuZG8gbm8gc2VhIGFzaSBzZSBkZWJlIGRlIHVzYXIgbGEgZnVuY2lvbiBkZWwgcGFxdWV0ZSBfY2FyXw0KDQpgYGB7cn0NCg0KIyB2YXJpYWJsZSBkZXBlbmRpZW50ZSB+IHZhcmlhYmxlIGluZGVwLCBkYXRvcw0KDQpzdW1tYXJ5KGFvdihzaGlmdH50cmVhdG1lbnQsIGRhdGEgPVJvZGlsbGFzKSkNCg0KYW5vdmEobG0oc2hpZnR+dHJlYXRtZW50LCBkYXRhID0gUm9kaWxsYXMpKSAjIHVzYXIgZGUgcHJlZmVyZW5jaWEgZXN0ZQ0KDQoNCmBgYA0KDQpMYSBkaWZlcmVuY2lhIHJudHJlIGxtIHkgYW92IGVzIGVsIHRpcG8gZGUgbW9kZWxvIHkgbWFzIHF1ZSBuYWRhIGxhcyBwcmVzZW50YWNpb24gZGUgbG9zIGRhdG9zLCBzaSBxdWllcmVuIHNhYmVyIG1hcyBhbCByZXNwZWN0bw0KDQoobG0gdnMuIGFvdilbIGh0dHBzOi8vd3d3Lm9yZWlsbHkuY29tL2xpYnJhcnkvdmlldy90aGUtci1ib29rLzk3ODA0NzA1MTAyNDcvY2gwMTEtc2VjMDE1Lmh0bWxdDQoNClNpbiBlbWJyZ28gcGFyYSBmaW5lcyB1dGlsZXMgeW8gdXNvIGFvdigpIHlhIHF1ZSBwb3IgZGVmaW5pY2lvbiBzaWduaWZpY2EgYW5hbGlzaXMgZGUgdmF0aWFuemENCg0KIyBBbm92YSBjb24gZWwgcGFxdWV0ZSBjYXINCg0KRXN0ZSBwYXF1ZXRlIGVzdGEgZW5mb2NhZG8gYSB2YXJpb3MgdGlwb3MgZGUgYW5hbGlzaXMgZXN0YWRpc3RpY29zIHkgc3UgZnVuY2lvbiBkZSBBTk9WQSB0aWVuZSB1biBhcmd1bWVudG8gcGFyYSBsaWRpYXIgY29uIGRhdG9zIGRlc2JhbGFuY2VhZG9zIChUaXBvIElJIHkgSUlJKS4gQWRlbWFzIHF1ZSBlc3RlIHBhcXVldGUgdGFtYmllbiBjdWVudGEgY29uIGxhIGZ1bmNpb24gbGV2ZW5lIHBhcmEgY2hlY2FyIGlndWFsZGFkIGRlIHZhcmlhbnphcy4NCg0KW1RpcG9zIGRlIEFOT1ZBXShodHRwczovL3d3dy5yLWJsb2dnZXJzLmNvbS8yMDExLzAzL2Fub3ZhLSVFMiU4MCU5My10eXBlLWlpaWlpaS1zcy1leHBsYWluZWQvKQ0KDQpgYGB7cn0NCiMjIFJldmlzYXIgcG9yIGhvbW9nZW5laWRhZCBkZSB2YXJpYW56YXMNCg0KbGV2ZW5lVGVzdChzaGlmdH50cmVhdG1lbnQsIGRhdGEgPSBSb2RpbGxhcykgIyBtYXlvciBhIDAuMDUgZXMgbm9ybWFsIHF1aWVyZSBkZWNpciBxdWUgaGF5IGhvbW9nZW5laWRhZCBsZXZlbmUudGVzdCBubyBmdW5jaW9uYQ0KDQpwbG90KHJvZF9hbm92YSwxKSAjIEludGVycHJldGFjaW9uOiBsb3MgcmVzaWR1YWxlcyB0aWVuZW4gcXVlIGVzdGFyIGRpc3RyaWJ1aWRvcyBkZSBtYW5lcmEgYWxlYXRvcmlhIHkgdGllbmVuIHZhcmlhbnphIGNvbnN0YW50ZSwgY2FzaSBubyBzZSBvY3VwYQ0KDQojIyBBTk9WQQ0KDQpyb2RfYW5vdmEgPC0gYW92KHNoaWZ0fnRyZWF0bWVudCwgZGF0YSA9IFJvZGlsbGFzKSAjIHNlIHB1ZWRlIHVzYXIgbG0gbyBhb3YNCg0KQW5vdmEocm9kX2Fub3ZhKSAjIGZpamVuc2UgcXVlIHZhIGNvbiBtYXl1c2N1bGENCg0KIyBhdXRvbWF0aWNhbWVudGUgZGEgZWwgdGlwbyBJSQ0KDQojIyBBbm92YSB0aXBvIElJSQ0KDQpBbm92YShyb2RfYW5vdmEsIHR5cGU9MykgIyBlc3RlIG5vIGVyYSBjb3JyZWN0byBjb3JyZXIgcGFyYSBlc3RlIHNldCBkZSBkYXRvcw0KDQoNCmBgYA0KDQpMYSBkaWZlcmVuY2lhIHByaW5jaXBhbCBlbnRyZSBlbCB0aXBvIDIgeSAzIGVzIGxhIGludGVyYWNjaW9uIGRlIGxhcyB2YXJpYWJsZXMgaW5kZXBlbmRpZW50ZXMuIHlvIGxlcyByZWNvbWllbmRvIHF1ZSB1c2VuIHRpcG8gMiBzaSBubyBlc3RhbiBzZWd1cm9zIHNpIHN1cyB2YXJpYWJsZXMgaW50ZXJhY3R1YW4gZW50cmUgc2kuIA0KDQpfQ29uY2x1c2lvbjpfIHNpIHA8MC4wNSBlbnRvbmNlcyBzaSBoYXkgZGlmZXJlbmNpYSBzaWduaWZpY2F0aXZhIGVudHJlIG1pcyBncnVwb3MgDQoNCiMgVHVrZXkgSFNEDQoNCkVuIGNhc28gcXVlIHVuYSBBTk9WQSBub3MgbXVlc3RyZSBxdWUgZXhpc3RlbiBkaWZlcmVuY2lhcyBzaWduaWZpY2F0aXZhcyBlbnRyZSB0cmF0YW1pZW50b3MsIGVsIHBhc28gc2lndWllbnRlIGVzIGNvcnJlciB1biB0ZXN0IHRoZSB0dWtleSBIU0QgZW4gZWwgY3VhbCBub3MgZGVnbG9zYSBsYSBBTk9WQSB5IG5vcyBkaWNlIGN1YWxlcyBkZSBsb3MgdHJhdGFtaWVudG9zIHNvbiBkaWZlcmVudGVzDQoNCl9Db25jbHVzaW9uXzogZG9uZGUgcCA8LjA1IA0KDQpQYXJhIGVzdG8gc29sbyBoYXkgdW4gY29kaWdvIGVsIGN1YWwgZXMgX1R1a2V5SFNEKClfDQoNCmBgYHtyfQ0KDQojIGVsIGNvZGlnbyBlcyBpZ3VhbA0KDQpUdWtleUhTRChyb2RfYW5vdmEpICMgbzwwLjA1IHNvbiBkaWZlcmVudGVzIA0KVHVrZXlIU0QoYW92KHNoaWZ0fnRyZWF0bWVudCwgZGF0YSA9IFJvZGlsbGFzKSkNCg0KDQpgYGANCg0KDQo=</div>
 
 
 

@@ -12,12 +12,13 @@ Prueba de hipotesis parametrica para comparar la media de una o dos poblaciones.
 
 Fosf <- read.csv("~/capR/curso/curso_Innovak/Material_clase/phosphorus.csv")
 
-Profundidad
+Profundidad <- read.csv("~/capR/curso/curso_Innovak/Material_clase/IBPJ.Thaw.csv")
 
-Doc
+Doc <- read.csv("~/capR/curso/curso_Innovak/Material_clase/Pond.Lake.DOC.csv")
 
-Calidad de agua
+Calidad_agua <- read.csv("~/capR/curso/curso_Innovak/Material_clase/WQ.August.csv")
 
+viabilidad <- read.csv("~/capR/curso/curso_Innovak/Material_clase/Viabilidad.csv")
 
 ```
 
@@ -31,11 +32,221 @@ __Cuando usarla?__
 *Control de calidad
 
 ```{r}
-t.test(Fosf$TDP, mu = 75.6) # mu valor de referencia
+
+t.test(log(Fosf$TDP),mu = log(75.6)) # mu valor de referencia, corregido con el log
+
+shapiro.test(Fosf$TDP)
+hist(Fosf$TDP)
+qqnorm(Fosf$TDP)
+
+```
+# Prueba T pareada
+
+La prueba T pareada es un metodo que se usa para comprobar si la media entre pares de medias es o no igual a cero 
+
+__Cuando usarla?__
+
+*Para pruebas de antes y despues (tienen que ser dos variables dependientes conectadas entre si)
+
+```{r}
+#Checar normalidad en la diferencia  no en el set de datos
+
+Dif <- Profundidad$Thaw.2010s - Profundidad$Water.1970s
+
+shapiro.test(Dif)
+
+par(mfrow=c(1,2))
+hist(Dif)
+qqnorm(Dif)
+
+t.test(Profundidad$Thaw.1970s,Profundidad$Thaw.2010s,
+       alternative=c("two.sided"),
+       mu=0,paired=TRUE)
+
+```
+## Ejercicio
+
+Encontrar o crear un mini set de datos que podria ser analizado una prueba de t pareada. Realizar el test y concluir si existe o no difetencia estadistica
+
+
+```{r}
+
+Dife <- viabilidad$Citometria - viabilidad$Siembraenplaca
+
+shapiro.test(Dife)
+
+par(mfrow=c(1,2))
+hist(Dife)
+qqnorm(Dife)
+
+t.test (log(viabilidad$Citometria),
+        log(viabilidad$Siembraenplaca),
+        alternative=c("two.sided"),
+        mu=0,paired=TRUE)
+       
+```
+
+# Prueba T para dos muestras
+
+Esta es la mas comun o la mas conocida(tambien llamada prueba t de muestras independientes) es un metodo utilizado para probar si las medias de poblacion desconocidas de dos grupos son iguales o no
+
+De este tipo de prueba hay dos variables la T de student y el test Welch´s (no asume varianzas iguales)
+
+__¿Como usarla?__
+
+Comparar dos grupos diferentes en relacion con una vaiable dependiente:
+
+Biomasa de UNA especie planta en dos regimenes diferntes de crecimiento
+
+*Concentracion de metales pesados entre dos campos de cultivo
+
+
+```{r}
+
+# Estr(uctura: (variable dep ~ variable indep, data= tabla)
+
+t.test(DOC ~ Habitat, data = Doc) # data es el nombre del archivo 
+
+
+
 
 
 ```
 
+Como pueden observar la estructura del codigo de estas pruebas no es tan complicada como todo el codigo previo que ya hemos hecho. Sin embargo lo complicado a partir de aquies usar criterio para ver cual de tpdas las pruebas se debe usar para analizar los datos que tengas
 
+## EjERCICIO
+
+Usando el data frame caldad de agua comparar DOC(ppm), forfoeo, reactivo soluble (SRP; ug/L) y clorofila en fitoplancton (ug/L) EN ESTANQUES DE Alaska entre los años 1970 y 2000
+
+```{r}
+#1
+shapiro.test(Calidad_agua$SRP)
+
+par(mfrow=c(1,2))
+hist(Calidad_agua$SRP)
+qqnorm(Calidad_agua$SRP)
+
+# Estructura: (variable dep ~ variable indep, data= tabla)
+
+t.test(log(SRP) ~ Era, data = Calidad_agua) # data es el nombre del archivo
+
+# 2
+shapiro.test(Calidad_agua$Phyto)
+
+par(mfrow=c(1,2))
+hist(Calidad_agua$Phyto)
+qqnorm(Calidad_agua$Phyto)
+
+t.test(log(Phyto) ~ Era, data = Calidad_agua) 
+
+# 3
+shapiro.test(Calidad_agua$DOC1)
+
+par(mfrow=c(1,2))
+hist(Calidad_agua$DOC1)
+qqnorm(Calidad_agua$DOC1)
+
+t.test(DOC1 ~ Era, data = Calidad_agua) 
+
+
+```
+
+# Introduccion
+
+A un nivel mayor de complejidad que las pruebas de t de anova (analysis of variance) es una formula estadistica que se utiliza para comparar varianzas entre las medias de diferentes (mas de dos grupos)
+
+Existe el ANOVA de una via en la que solo se tiene una variable independiente (con varios grupos) y se quiere ver la diferencia entre dicho grupos sobre una variables dependiente como ejemplo el tratamiento
+
+El ANOVA 2 VIAS añade otra variable indepenediente por lo que mide el efecto de dos variables independientes sobra una variable dependiente. Tambien existe la ANOVA de tres vias pero la complejidad en comparaciones y tratamientos crece bastante
+ejemplo: var. independiente (tipo de planta y crecimiento) , var depend (Crecimiento de la planta)
+
+
+```{r}
+# Library
+
+library(dplyr)
+library(tidyverse)
+library(car)
+
+# Data 
+Rodillas <- read.csv("~/capR/curso/curso_Innovak/Material_clase/Rodillas.csv")
+
+```
+
+# Anova de una via
+ 
+Es decir solo un tratamiento independiente
+ 
+# Anova en R
+
+R base puede calcular anova de dos maneras diferentes, una de ellas usando el codigo _anova()_ . Sin embargo, esta funcion base se calcula automaticamente una ANOVA tipo 1 la cual da por sentado que los datos son balanceados por lo que cuando no sea asi se debe de usar la funcion del paquete _car_
+
+```{r}
+
+# variable dependiente ~ variable indep, datos
+
+summary(aov(shift~treatment, data =Rodillas))
+
+anova(lm(shift~treatment, data = Rodillas)) # usar de preferencia este
+
+
+```
+
+La diferencia rntre lm y aov es el tipo de modelo y mas que nada las presentacion de los datos, si quieren saber mas al respecto
+
+(lm vs. aov)[ https://www.oreilly.com/library/view/the-r-book/9780470510247/ch011-sec015.html]
+
+Sin embrgo para fines utiles yo uso aov() ya que por definicion significa analisis de vatianza
+
+# Anova con el paquete car
+
+Este paquete esta enfocado a varios tipos de analisis estadisticos y su funcion de ANOVA tiene un argumento para lidiar con datos desbalanceados (Tipo II y III). Ademas que este paquete tambien cuenta con la funcion levene para checar igualdad de varianzas.
+
+[Tipos de ANOVA](https://www.r-bloggers.com/2011/03/anova-%E2%80%93-type-iiiiii-ss-explained/)
+
+```{r}
+## Revisar por homogeneidad de varianzas
+
+leveneTest(shift~treatment, data = Rodillas) # mayor a 0.05 es normal quiere decir que hay homogeneidad levene.test no funciona
+
+plot(rod_anova,1) # Interpretacion: los residuales tienen que estar distribuidos de manera aleatoria y tienen varianza constante, casi no se ocupa
+
+## ANOVA
+
+rod_anova <- aov(shift~treatment, data = Rodillas) # se puede usar lm o aov
+
+Anova(rod_anova) # fijense que va con mayuscula
+
+# automaticamente da el tipo II
+
+## Anova tipo III
+
+Anova(rod_anova, type=3) # este no era correcto correr para este set de datos
+
+
+```
+
+La diferencia principal entre el tipo 2 y 3 es la interaccion de las variables independientes. yo les recomiendo que usen tipo 2 si no estan seguros si sus variables interactuan entre si. 
+
+_Conclusion:_ si p<0.05 entonces si hay diferencia significativa entre mis grupos 
+
+# Tukey HSD
+
+En caso que una ANOVA nos muestre que existen diferencias significativas entre tratamientos, el paso siguiente es correr un test the tukey HSD en el cual nos deglosa la ANOVA y nos dice cuales de los tratamientos son diferentes
+
+_Conclusion_: donde p <.05 
+
+Para esto solo hay un codigo el cual es _TukeyHSD()_
+
+```{r}
+
+# el codigo es igual
+
+TukeyHSD(rod_anova) # o<0.05 son diferentes 
+TukeyHSD(aov(shift~treatment, data = Rodillas))
+
+
+```
 
 
