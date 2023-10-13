@@ -20,6 +20,10 @@ Calidad_agua <- read.csv("~/capR/curso/curso_Innovak/Material_clase/WQ.August.cs
 
 viabilidad <- read.csv("~/capR/curso/curso_Innovak/Material_clase/Viabilidad.csv")
 
+Estanques <- read.csv("~/capR/curso/curso_Innovak/Material_clase/BRW.ponds.csv")
+
+Comp_suelos <- read.csv("~/capR/curso/curso_Innovak/Material_clase/Soil_Comparison.csv")
+
 ```
 
 # Prueba de T de una muestra
@@ -168,6 +172,7 @@ ejemplo: var. independiente (tipo de planta y crecimiento) , var depend (Crecimi
 library(dplyr)
 library(tidyverse)
 library(car)
+library(agricolae)
 
 # Data 
 Rodillas <- read.csv("~/capR/curso/curso_Innovak/Material_clase/Rodillas.csv")
@@ -224,6 +229,10 @@ Anova(rod_anova) # fijense que va con mayuscula
 
 Anova(rod_anova, type=3) # este no era correcto correr para este set de datos
 
+Rodillas %>%
+  group_by(treatment) %>%
+  summarise(n())
+
 
 ```
 
@@ -246,7 +255,146 @@ Para esto solo hay un codigo el cual es _TukeyHSD()_
 TukeyHSD(rod_anova) # o<0.05 son diferentes 
 TukeyHSD(aov(shift~treatment, data = Rodillas))
 
+plot(TukeyHSD(rod_anova)) # si el intervalo de confianza no se superpone con la diferencia media no son significativos
+     
+
 
 ```
+
+## Ejercicio
+
+usando el dataframe de estanques vamos a comparar la calidad del agua en los estanques entre 3 regiones diferentes de Alaska. Para ello cada uno de usted seleccionara una de las variables y llevara a cabo un test de ANOVA tomar los siguientes:
+
+*Checar normalidad y de no estar normalizado , transformar
+*checar si el set de datos esta balanceado (para elegir el tipo de anova)
+*Checar homogenidad de varianza
+*Calcular ANOVA y si es significativa calcular TUKEY HSD
+*Hacer un grafico del resultado Tukey
+
+```{r}
+
+# Checar normalidad 
+
+shapiro.test(Estanques$Temp)
+
+par(mfrow=c(1,2))
+hist(Estanques$Temp)
+qqnorm(Estanques$Temp)
+
+# transformar:
+
+shapiro.test(log(Estanques$Temp))
+
+par(mfrow=c(1,2))
+hist(log(Estanques$Temp))
+qqnorm(log(Estanques$Temp))
+
+# checar si esta balanceado
+
+Estanques %>%
+  group_by(Region) %>%
+  summarise (n())
+
+# Homogenidad de varianza
+
+leveneTest(log(Temp)~Region, data = Estanques) # mayor a 0.05 es normal quiere decir que hay homogeneidad, por lo tanto si hay homogeneidad ya que sale mayor 0.483
+
+
+# Anova tipo II
+
+estan_anova <- aov(log(Temp)~Region, data = Estanques) # se puede usar lm o aov
+
+Anova(estan_anova) # No hay diferencias significativa, pero como esta justo en el rango (Diferencia marginal) se correra Tukey para ver si si hay alguna dif
+
+# Tukey
+
+TukeyHSD(estan_anova) # <0.05 son diferentes (Hay diferencia en IBP CON BEO, se puede decir que es una diferencia marginal)
+
+
+# Grafico Tukey
+
+plot(TukeyHSD(estan_anova))
+
+
+```
+
+# ANOVA DE DOS VIAS
+
+Aunque este tipo de analisis es sumamente util, muchas veces nuestros experimentos inlcuyen mas de una variable independiente que manipulamos. Para ello los datos se pueden comparar usando una ANOVA es de 2 o mas vias
+
+```{r}
+
+leveneTest(logNH3 ~ Temperature*Soil, data = Comp_suelos)
+
+## Balanceado?
+
+Comp_suelos %>%
+  group_by(Temperature,Soil) %>%
+  summarise(n())
+
+# Efecto aditivo
+
+est_anova <- aov(logNH3 ~ Temperature + Soil, data = Comp_suelos)
+Anova(est_anova)
+
+#Interaccion entre variables
+
+est_anova <- aov(logNH3 ~ Temperature*Soil, data = Comp_suelos)
+Anova(est_anova)
+
+# TukeyHSD
+
+est_tukey <- TukeyHSD(est_anova)
+plot(est_tukey)
+
+# El camino facil: Agricolae
+
+summary(est_anova)
+
+rtout <- HSD.test(est_anova, trt = c("Temperature","Soil"),
+                  alpha = 0.05)
+
+```
+
+## Ejercicio
+
+Ahora les toca a ustedes cada quien va a elegir 1 variable y comparar los efectos de temperatura y tipo de suelo en ellas
+Tienen que seguir el mismo proceso y al final me van a explicar porque si o no hay diferencia significativa entre los grupos.
+
+```{r}
+leveneTest(logSRP ~ Temperature*Soil, data = Comp_suelos)
+
+## Balanceado?
+
+Comp_suelos %>%
+  group_by(Temperature,Soil) %>%
+  summarise(n())
+
+# Efecto aditivo
+
+SRP_anova <- aov(logSRP ~ Temperature + Soil, data = Comp_suelos)
+Anova(SRP_anova)
+
+#Interaccion entre variables
+
+SRP_anova <- aov(logSRP ~ Temperature*Soil, data = Comp_suelos)
+Anova(SRP_anova)
+
+# TukeyHSD
+
+SRP_tukey <- TukeyHSD(SRP_anova)
+plot(SRP_tukey)
+
+# El camino facil: Agricolae
+
+summary(SRP_anova)
+
+letras <- HSD.test(SRP_anova, trt = c("Temperature","Soil"),
+                  alpha = 0.05)
+
+
+```
+
+
 
 
