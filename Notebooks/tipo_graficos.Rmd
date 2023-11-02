@@ -1,0 +1,668 @@
+---
+title: "Tipos de graficos"
+output: html_notebook
+---
+
+ 
+
+```{r}
+
+# Libraries
+library(ggplot2)
+library(tidyverse)
+library(patchwork)
+library(RColorBrewer)
+library(ggbreak)
+
+## Data
+
+# box plots
+
+data("CO2")
+
+Comp_soils <- read.csv("~/capR/curso/curso_Innovak/Material_clase/Soil_Comparison.csv")
+
+
+# Puntos
+
+data("iris")
+Flujos_C <- read.csv("~/capR/curso/curso_Innovak/Material_clase/flujos.csv")
+
+# barras
+
+Roedores <- read.csv("~/capR/curso/curso_Innovak/Material_clase/Roedores.csv")
+
+```
+
+# BOxplots
+
+Los boxplots seran el grafico que mas comunmente usaran para presentar datos ya que permite condensar gran numero de informacion combinando una  variables discreta (x) y  variable continua (y)
+
+```{r}
+
+theme_set(theme_bw())
+
+ggplot(CO2,aes(x= Type, y= uptake))+
+  geom_boxplot(fill= "darkgreen", # relleno
+               col = "pink")+ # borde
+  theme_classic()# cambiar tema
+
+
+
+```
+
+Si bien esta grafica nos esta comparadano los dos tipos de planta que tenemos realmente, no es muy informativa basada en los atos que tenemos ya que dejamos de lado que existian diferentes tipos de tratamientos a lo que estuvieron sujetos estas pantas. Es por ello sque boxplot es tan poderoso
+
+```{r}
+
+ggplot(CO2,aes(x= Type, y = uptake, fill = Treatment))+
+  geom_boxplot()
+
+
+ggplot(CO2,aes(x= Treatment, y = uptake, fill = Type))+
+  geom_boxplot()
+
+
+
+```
+
+Al agregar esta otra variable el boxplot automaticamente detecta que tienes dos variables idndependeientes las cuales se deben de graficar separadno grupos. Otro elemento interesante es que ggplot2 tiene colores automaticos
+
+
+### Leyendas
+
+Pero ahora si, antes de seguir con las maravillas de  un boxplot veamos como podemos modificar las leyendas 
+
+```{r}
+
+# Primero que hacer si la leyenda nos estorba
+
+ggplot(CO2,aes(x= Type, y = uptake, fill = Treatment))+
+  geom_boxplot()+
+  theme(legend.position = "none")
+
+# Bueno no nos estorba pero no queremos que tenga titulo
+
+ggplot(CO2,aes(x= Type, y = uptake, fill = Treatment))+
+  geom_boxplot()+
+  theme(legend.title = element_blank()) # significa vacio 
+
+# otra opcion
+
+ggplot(CO2,aes(x= Type, y = uptake, fill = Treatment))+
+  geom_boxplot()+
+  scale_fill_discrete(name= NULL) # no le estoy poniendo nombre
+
+
+```
+
+Si bien usualmente las leyendas van del lado derecho de nuestro grafico tambien odemos cambiarla de lugar
+
+```{r}
+
+ggplot(CO2,aes(x= Type, y = uptake, fill = Treatment))+
+  geom_boxplot()+
+  theme(legend.position = "bottom") # sirve para cambiar la posicion de la leyenda si la queremos abajo, arriba, izq, derecha
+
+```
+
+Y como con nuestras otras variables tambien podemos modificar el formato de texto
+
+```{r}
+
+ggplot(CO2,aes(x= Type, y = uptake, fill = Treatment))+
+  geom_boxplot()+
+  theme(legend.title = element_text(color= "chocolate",
+                                    size = 14,
+                                    face = "bold"))+ # modificar letra y tamaño y color y negritas 
+  ggtitle("CO2") # titulo
+
+```
+
+Tambien podemos cambiar el nombre y orden de nuestras etiquetas. Esto puede ser muy util cuando tenemos codigos o abreviaciones que no son muy informativos en nuestro set de datos
+
+```{r}
+
+# Cambiar orden de datos
+
+CO2$Treatment <- factor(CO2$Treatment, levels =
+                          c("chilled","nonchilled"), ordered = TRUE)
+
+ggplot(CO2,aes(x = Type, y = uptake, fill = Treatment))+
+  geom_boxplot()
+
+# Cambiar el nombre de los datos
+
+ggplot(CO2,aes(x = Type, y = uptake, fill = Treatment))+
+  geom_boxplot()+
+  scale_fill_discrete(name = "Tratamientos",
+                      labels = c("Frio", "Temperado"))+ # LEYENDAS 
+  xlab("Tipo de planta") + 
+  ylab(bquote("Absorcion de CO"[2])) # ETIQUETA EJES
+
+
+```
+
+Como con todos lo slementos que hemos visto las modificaciones a las leyendas son interminables. Yo aqui les muestro las que mas comunmente van a ocupar, pero ustedes pueden hacer todo tipo de modificaciones dependiendo de sus necesidades
+
+
+### Ejercicio
+
+Usando los datos de Comp_soils quiero que grafiquen un boxplot de una variable diferente cada quien en el que comparen tipo de suelo por temperatura. Ademas deben de modificar por lo menos una vez lo siguientes elementos:
+
+1. Modificacion a la leyenda (que no sea quitarla!)
+2. Etiquetas de los ejes
+3. Modificacion de la escala de los ejes
+4. Un titulo con por lo menos una modificacion en formato
+
+```{r}
+
+theme_set(theme_grey())
+
+ggplot(Comp_soils,aes(x= Temperature, y= SRP.ugL, fill = Soil))+
+  geom_boxplot()+
+  theme(legend.position = "bottom")
+             
+# Etiquetas de ejes
+
+ggplot(Comp_soils,aes(x= Temperature, y= SRP.ugL, fill = Soil))+
+  geom_boxplot()+
+  theme(legend.position = "bottom")+  
+  xlab("Temperatura") + 
+  ylab("Medicion SRP")
+  
+# Modificacion escala ejes
+  
+ggplot(Comp_soils,aes(x= Temperature, y= SRP.ugL, fill = Soil))+
+  geom_boxplot()+
+  theme(legend.position = "bottom")+  
+  xlab("Temperatura") + 
+  ylab("Medicion SRP") +
+  ylim(c(.5,15)) 
+  
+
+
+  
+# Titulo con modificacion en formato
+  
+ggplot(Comp_soils,aes(x = Temperature, y = SRP.ugL, fill = Soil))+
+  geom_boxplot()+
+  theme(legend.position = "bottom")+  
+  xlab("Temperatura") + 
+  ylab("Medicion SRP") +
+  ylim(c(.5,15)) +
+  ggtitle("Composicion Suelo") +
+  theme(plot.title = element_text(hjust = .5, face = "bold"),
+        legend.title = element_text(color= "red",
+                                    size = 12,
+                                    face = "bold"))
+```
+## Modificando colores en boxplots
+
+```{r}
+
+ggplot(CO2,aes(x = Type, y = uptake, fill = Treatment)) + 
+  geom_boxplot(fill = "darkgreen")
+
+
+```
+
+Recuerden que aqui el orden si importa y al momento de haberle dicho a nuestro grafico que lo queriamos en verde la separacion de relleno por tratamiento se anula. Para mantener dicha separacion y cambiar nuesyros colores usamos:
+
+```{r}
+ggplot(CO2,aes(x = Type, y = uptake, fill = Treatment)) + 
+  geom_boxplot() +
+  scale_fill_manual(name= " Treatment",
+                    values = c("green","purple")) # rellenar color
+
+
+# diferencia entre fill y color
+
+ggplot(CO2,aes(x = Type, y = uptake, col = Treatment)) +  
+  geom_boxplot() +
+  scale_color_manual(name= " Treatment",
+                    values = c("green", "purple")) # solo se pone el color del borde
+
+
+# cambiando uno y otro
+
+ggplot(CO2,aes(x = Type, y = uptake, fill = Treatment)) +  
+  geom_boxplot(col= "yellow") + # cambia ambas
+  scale_fill_manual(name= " Treatment",
+                    values = c("green", "purple"))+
+  theme_dark()
+
+
+ggplot(CO2,aes(x = Type, y = uptake, col = Treatment)) +  
+  geom_boxplot(fill = "black") + # cambia ambas
+  scale_color_manual(name= " Treatment",
+                    values = c("green", "purple"))
+
+## y si queremos cambiar por variables?
+
+ggplot(CO2,aes(x = Type, y = uptake, col = Treatment, 
+               fill= Treatment)) +  
+  geom_boxplot() +
+  scale_color_manual(name= " Treatment",
+                    values = c("green", "purple")) +
+  scale_fill_manual(name= " Treatment",
+                    values = c("purple", "green"))
+
+
+```
+
+## Otras cosas extrañas que modificar en un boxplot: van dentro del codigo boxplot
+
+*outlier.colour, outlier.shape, outlier.size
+*notch
+*lwd, alpha (o transparencia )
+*puntos de media
+*boxdots # ayudan a que tan dispersos estan los graficos
+
+
+```{r}
+
+# outliers
+
+ggplot(CO2,aes(x = Type, y = uptake, fill = Treatment)) + 
+  geom_boxplot(outlier.colour = "red", outlier.shape = 16,
+               outlier.size = 2) +
+  scale_fill_manual(name= " Treatment",
+                    values = c("green","purple"))
+
+# notch
+
+ggplot(CO2,aes(x = Type, y = uptake, fill = Treatment)) + 
+  geom_boxplot(notch = TRUE, notchwidth = 0.5) +
+  scale_fill_manual(name= " Treatment",
+                    values = c("green","purple"))
+
+# lwd, alpha
+
+
+ggplot(CO2,aes(x = Type, y = uptake, fill = Treatment)) + 
+  geom_boxplot(lwd = 0.5, alpha = 0.2) + # lwd es grosor linea y alpha transparencia
+  scale_fill_manual(name= " Treatment",
+                    values = c("green","purple"))
+
+# mean dots
+
+ggplot(CO2,aes(x = Type, y = uptake, fill = Treatment)) + 
+  geom_boxplot(alpha= 0.5) +
+  scale_fill_manual(name= " Treatment",
+                    values = c("green","purple")) +
+  stat_summary(fun.y = mean, geom = "point", shape = 23, size =4,
+               position=position_dodge(1))
+
+# boxdots
+
+ggplot(CO2,aes(x = Type, y = uptake, fill = Treatment)) + 
+  geom_boxplot(alpha= 0.5) +
+  scale_fill_manual(name= " Treatment",
+                    values = c("green","purple")) +
+  geom_dotplot(binaxis = "y", stackdir = "center", dotsize =1,
+               position=position_dodge(1)) # es otra geometria
+
+```
+
+## Ejercicio
+
+Al boxplot que hicieron en el ejerciio anterior modifiquenle todo lo que aprendimos:
+
+1. Colores dentro del grafico (color/fill uds decidan)
+2. como se van a ver los outliers, si no tienen agreguen punto de media 
+```{r}
+
+ggplot(Comp_soils,aes(x = Temperature, y = SRP.ugL, fill = Soil))+
+  geom_boxplot(alpha = 0.8) +
+  scale_fill_manual(name= " Soil",
+                    values = c("aquamarine","deeppink2")) +
+  stat_summary(fun.y = mean, geom = "point", shape = 8, size =2.5,
+               position=position_dodge(1))+
+  theme(legend.position = "bottom")+  
+  xlab("Temperatura") + 
+  ylab("Medicion SRP") +
+  ylim(c(.5,15)) +
+  ggtitle("Composicion Suelo") +
+  theme(plot.title = element_text(hjust = .5, face = "bold"),
+        legend.title = element_text(color= "azure4",
+                                    size = 12,
+                                    face = "bold"))
+
+```
+
+# Retomando graficos de puntos
+
+Ayer aprendimos acerca de los elementos basicos con un ggplot usando un grafico de puntos. Sim embargo hay algunas otras cosas interesantes que se pueden hacer para mejorar los graficos de puntos
+
+## geom_point vs geom_jitter
+
+```{r}
+
+ggplot(iris, aes(x= Petal.Width, y= Petal.Length))+
+  geom_point(size = 2, fill = "hotpink3",
+             color = "black", shape = 21,
+             alpha = 0.5) # ven como hay mucho empalmen entre los puntos
+
+# Para esto esta geom jitter
+
+ggplot(iris, aes(x= Petal.Width, y = Petal.Length))+
+  geom_jitter(size = 2, fill = "hotpink3",
+             color = "black", shape = 21,
+             alpha = 0.5)
+
+
+
+```
+
+## Añadiendo mas informacion a nuestro grafico
+
+```{r}
+ggplot(iris, aes(x= Petal.Width, y = Petal.Length, fill = Species))+
+  geom_point(size = 2, color = "black", shape = 21,
+             alpha = 0.5)
+
+
+# Modificar colores y etiquetas ejes de este ultimo grafico
+
+ggplot(iris, aes(x= Petal.Width, y = Petal.Length, fill = Species))+
+  geom_point(size = 2, color = "black", shape = 21,
+             alpha = 0.5) +
+  scale_fill_manual(name= "Especies",
+                    values = c("blue","purple", "coral"))+
+  xlab("Ancho petalo") + 
+  ylab("Largo petalo")
+  
+
+
+```
+
+## Añadiendo correlacion
+
+Si ademas quisieramos añadir la correlacion que tienen el ancho y latog de los petalos a nuestro grfico tambien se puede hacer
+
+```{r}
+
+ggplot(iris, aes(x= Petal.Width, y = Petal.Length, fill = Species))+
+  geom_point(size = 2, color = "black", shape = 21,
+             alpha = 0.5) +
+  scale_fill_manual(name= "Especies",
+                    values = c("blue","purple", "coral"))+
+  xlab("Ancho petalo") + 
+  ylab("Largo petalo")+
+  geom_abline() # linea de correlacion no sale bien
+
+```
+__ Antes necesitamos especificar intercept y pendiente__
+
+Pero para ellos debemos calcularlos
+
+```{r}
+
+# Calculando regresion lineal
+
+summary(lm(Petal.Length ~ Petal.Width, data = iris))
+
+coef(lm(Petal.Length ~ Petal.Width, data = iris)) # el atajo
+
+
+# Ahora si el grafico
+
+ggplot(iris, aes(x= Petal.Width, y = Petal.Length, fill = Species))+
+  geom_point(size = 2, color = "black", shape = 21,
+             alpha = 0.5) +
+  scale_fill_manual(name= "Especies",
+                    values = c("blue","purple", "coral"))+
+  xlab("Ancho petalo") + 
+  ylab("Largo petalo")+
+  geom_abline(aes(intercept = 1.083558 , slope = 2.229940))
+
+
+
+```
+
+o podemos usar un atajo con geom_smooth
+
+```{r}
+
+## otro atajo geom_smooth
+
+ggplot(iris, aes(x= Petal.Width, y = Petal.Length))+
+  geom_point(size = 2, color = "purple", shape = 21,
+             alpha = 0.5) +
+  geom_smooth(method = "lm",
+              se = FALSE, # intervalo de confianza
+              color = "black",
+              linewidth = 0.5)
+
+ggplot(iris, aes(x= Petal.Width, y = Petal.Length, fill = Species))+
+  geom_point(size = 2, color = "purple", shape = 21,
+             alpha = 0.5) +
+  geom_smooth(method = "lm",
+              se = FALSE, # intervalo de confianza
+              color = "black",
+              linewidth = 0.5) # nos lo separa por especie
+
+ggplot(iris, aes(x= Petal.Width, y = Petal.Length))+
+  geom_point(size = 2, color = "purple", shape = 21,
+             alpha = 0.5, aes(fill=Species)) + # mover el fill
+  geom_smooth(method = "lm",
+              se = FALSE, # intervalo de confianza
+              color = "black",
+              linewidth = 0.5)
+
+```
+
+### y la ecuacion
+
+```{r}
+ggplot(iris, aes(x= Petal.Width, y = Petal.Length))+
+  geom_point(size = 2, color = "purple", shape = 21,
+             alpha = 0.5, aes(fill=Species)) + # mover el fill
+  geom_smooth(method = "lm",
+              se = FALSE, 
+              color = "black",
+              linewidth = 0.5)+
+  annotate(geom = "text", x = 0.75, y = 6.2,
+           label= "y=2.2x + 1.08", size = 3)
+```
+
+La funcion de annotate sirve para agregar cualquier tipo de texto al grafico. Por ejemplo mas adelante la usaremos para poner letras que denotan diferentes tratamientos
+
+Sin embargo, ahora que andamos en texto creo que tambien serie interesante ver otras funciones que tiene ggplot  para agregar texto en el grafico
+
+Por un lado geon_text unicamente agrega text al grafico mientras que geom_label lo pone en un rectangulo facilitando su lectura
+
+```{r}
+ggplot(iris, aes(x= Petal.Width, y = Petal.Length, label = Petal.Length))+
+  geom_point(size = 2, color = "purple", shape = 21,
+             alpha = 0.5, aes(fill=Species)) + # mover el fill
+  geom_smooth(method = "lm",
+              se = FALSE, 
+              color = "black",
+              linewidth = 0.5)+
+  geom_text(hjust = 0, nudge_x = 0.05)
+
+# label
+
+ggplot(iris, aes(x= Petal.Width, y = Petal.Length, label = Petal.Length))+
+  geom_point(size = 2, color = "purple", shape = 18,
+             alpha = 0.5, aes(fill=Species)) + 
+  geom_smooth(method = "lm",
+              se = FALSE, 
+              color = "black",
+              linewidth = 0.5)+
+  geom_label(aes(fill =factor(Species)), colour = "white",
+             fontface = "bold")
+
+
+```
+## Ejercicio
+
+Ahora si realicen dos graficos de correlacion uno para la correlacion de CO2 con minutos y el otro de CH4. Ambos deberan llevar su linea de correlacion y la ecuacion con la pendiente y el intercept. Traten de presentarlos uno a lado del otro usando patchwork. Cada uno de los graficos, debera tener diferentes colores y formas de puntos, contar con sus ejes y leyendas bien etiquetados y un titulo
+
+```{r}
+
+# en el eje Y es lo que estamos midiendo (Variable dependiente)
+
+CO2 <- ggplot(Flujos_C,aes(x= Minute , y = CO2.conc))+
+  geom_point(size = 2, color = "orange", shape = 18,
+             alpha = 0.5)+
+  xlab("Minutos") + 
+  ylab(bquote("Concentracion CO"[2])) +
+  ggtitle(bquote("Concentraciones CO"[2])) +
+  theme(plot.title = element_text(hjust = .5, face = "bold", color = "red"),
+        axis.title = element_text(size = 10, color = "darkblue"))+
+  geom_abline(aes(intercept = 215.720504 , slope = -2.109415))+
+  annotate(geom = "text", x = 25, y = 190,
+           label= "y=-2.10x + 215.72", size = 3)
+
+
+ 
+summary(lm(CO2.conc ~ Minute, data = Flujos_C))
+
+coef(lm(CO2.conc ~ Minute, data = Flujos_C))
+
+
+CH4 <- ggplot(Flujos_C,aes(x= Minute , y = CH4.conc))+
+  geom_point(size = 2, color = "darkgreen", shape = 16,
+             alpha = 0.5)+
+  xlab("Minutos") + 
+  ylab(bquote("Concentracion CH"[4])) +
+  ylim(c(12,25))+
+  ggtitle(bquote("Concentraciones CH"[4])) +
+  theme(plot.title = element_text(hjust = .5, face = "bold", color =" red"),
+        axis.title = element_text(size = 10, color = "darkblue"))+
+  geom_abline(aes(intercept = 12.2923797 , slope = 0.4136789))+
+  annotate(geom = "text", x = 10, y = 22.5,
+           label= "y=0.41x + 12.29", size = 3)
+
+
+Ccoef(lm(CH4.conc ~ Minute, data = Flujos_C))
+
+
+CO2 | CH4
+```
+
+# Grafico de barras
+
+En ggplot hay dos tipos de graficos de barras: geom_bar se describe su uso como para graficar cuentas de una sola variable discreta mientras que geom_col usa una variable discreta y una continua. Por ejemplo geom_bar podria usarse para contar el numero de casos en un grupo (numero de ratones encontrados por especie por ejemplo). En cambio geom_col usa valores dentro de los datos para representar la altura de la barra. Tambien existe geom_histogram pero ese funciona igual a un histograma normal por lo que sus usos son mas limitados.
+
+```{r}
+# histograma
+
+ggplot(Roedores, aes(weight))+
+  geom_histogram()
+
+# col
+
+ggplot(Roedores, aes(x= genus, y= weight))+
+  geom_col()+ # sumo todos los pesos asi que no es muy util
+  coord_flip()
+
+# barras
+
+ggplot(Roedores, aes(genus))+
+  geom_bar(fill= "darkgreen")
+
+# como hacerlo mas legible
+
+ggplot(Roedores)+
+  geom_bar(aes(y=genus), fill = "darkgreen") # similar a coord flip
+
+# tambien se puede incluir mas informacion
+
+ggplot(Roedores)+
+  geom_bar(aes(y=genus, fill= plot_type))+
+  scale_fill_manual(name= "Tipos",
+                    values = c("aquamarine3","orchid4", "coral","hotpink1", "olivedrab4"))
+
+
+
+```
+
+```{r}
+ggplot(Roedores)+
+  geom_bar(aes(y=genus, fill= plot_type))+
+  scale_fill_brewer(palette = "Paired",name = "Plot type")
+```
+
+[Paletas colores](https://www.datanovia.com/en/blog/top-r-color-palettes-to-know-for-great-data-visualization/)
+
+```{r}
+ggplot(Roedores)+
+  geom_bar(aes(y=genus, fill= plot_type))+
+  scale_fill_brewer(palette = "Paired",name = "Plot type",
+                    direction = -1)
+
+
+ggplot(Roedores)+
+  geom_bar(aes(y=genus, fill= plot_type))+
+  scale_fill_manual(values = rev(brewer.pal(12, "Paired")))
+
+```
+
+Sinembargo, ademas de los colores el principal problema de este grafico es la alta diferencia entre la abundancia de _Dipodomys_ y el resto de las especies. Para solucionarlo aprenderemos a hacer cortes o breaks en los ejes
+
+```{r}
+ggplot(Roedores)+
+  geom_bar(aes(y=genus, fill = plot_type))+
+  scale_colour_manual(values = rev(brewer.pal(12, "Paired")))+
+  scale_x_break(c(7000,15000), scale = 0.3)+
+  scale_x_break(c(700,1000), scale = 0.8)
+
+
+```
+
+Aunque esta muy bien contar el numero generos de ratoncitos que tenemos, usualmente los graficos de barras son udados para representar los valores medios de una poblacion . Para ello:
+
+```{r}
+
+# en este caso geom_bars nos da las medias del peso en contraste con como lo lee geom_plot
+
+ggplot(Roedores, aes(genus, weight, fill= sex))+
+  geom_bar(stat= "summary", fun = "mean")
+
+# remover NAs
+
+ggplot(subset(Roedores, !is.na(weight)),
+       aes(genus, weight, fill= sex))+
+  geom_bar(stat= "summary", fun = "mean", position = "stack") 
+
+# tambien podemos modificar las posiciones 
+
+ggplot(subset(Roedores, !is.na(weight)),
+       aes(genus, weight, fill= sex))+
+  geom_bar(stat= "summary", fun = "mean", position= "dodge") 
+
+ggplot(subset(Roedores, !is.na(weight)),
+       aes(genus, weight, fill= plot_type))+
+  geom_bar(stat= "summary", fun = "mean", position= "fill") # te cambia a proporciones 
+
+
+```
+
+```{r}
+
+# Pero primero tenemos que hacer una tabpla
+
+Pesos <- Roedores %>%
+  group_by(genus) %>%
+  summarize(weight = mean(weight, na.rm = TRUE))
+
+ggplot(Pesos, aes(x=genus, y= weight))+
+  geom_col()+
+  coord_flip()
+
+# agrupacion por grupos
+
+Pesos <- Roedores %>%
+  group_by(genus,sex) %>%
+  summarize(weight = mean(weight, na.rm = TRUE))
+
+ggplot(subset(Pesos, !is.na(weight)), aes(x = genus, y= weight, fill=sex))+
+  geom_col()+
+  coord_flip()
+
+```
+
