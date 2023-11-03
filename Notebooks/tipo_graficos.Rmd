@@ -13,6 +13,8 @@ library(tidyverse)
 library(patchwork)
 library(RColorBrewer)
 library(ggbreak)
+library(plotrix)
+library(ggsignif)
 
 ## Data
 
@@ -663,6 +665,186 @@ Pesos <- Roedores %>%
 ggplot(subset(Pesos, !is.na(weight)), aes(x = genus, y= weight, fill=sex))+
   geom_col()+
   coord_flip()
+
+```
+
+## Barras de error
+
+```{r}
+# tabla de estadistica 
+
+Roed_summ <- Roedores %>%
+  filter(!is.na(weight)) %>%
+  group_by(genus, sex) %>%
+  summarize(Mean = mean(weight, na.rm = TRUE),
+            SD = sd(weight, na.rm = TRUE),
+            STD = std.error(weight, na.rm = TRUE)) # plotrix package
+
+ggplot(Roed_summ, aes(genus, Mean, fill = sex))+
+  geom_bar(stat= "identity", position = "dodge")+
+  geom_errorbar(aes(ymin= Mean-SD, # nueva geometria
+                    ymax=Mean+SD), width=.2,
+                position=position_dodge(.9))
+
+
+
+```
+
+## Ejercicio
+
+Hgan una grafica con la longitud del sepalo de la tabla iris. Separen por especie, saquen la media y grafiquen incluyendo las barras de error, como siempre quiero que modifiquen colores y etiquetas de ejes y titulo
+
+```{r}
+
+Sepalo <- iris %>%
+  group_by(Species) %>%
+  summarize(Media = mean(Sepal.Length),
+            SD = sd(Sepal.Length))
+
+ggplot(Sepalo, aes(Species, Media, fill= Species))+
+  geom_bar(stat= "identity", position = "dodge")+
+  geom_errorbar(aes(ymin= Media-SD, 
+                    ymax=Media+SD), width=.2, # ancho de la linea-barra
+                position=position_dodge(.9))+ # mover linea entre barra
+   scale_fill_manual(name= "Especies petalos",
+                    values = c("blue","purple", "coral"))
+
+```
+
+# Grafico circular
+
+Curiosamente ggplot no tiene un geometria especial para hacer graficos circulaes o de pay
+
+```{r}
+
+ggplot(Roedores, aes(x= factor(1), fill = plot_type))+
+  geom_bar(width=1, color="white")+
+  coord_polar("y")+ # lo hace ciruclar 
+  theme_void()
+       
+```
+
+En realidad el codigo para este tipo de graficos no estan complicado. lo mas dificil es tener la tabla en el formato correcto, casi no van a usar este tipo de formato usualmente los datos que usen tendrian que estar en proporciones o porcentajes o podee convertirse a los mismos
+
+# Añadiendo significancia
+
+## por grupos
+
+ Como varios durante la seccion estadistica de nuestro curso las diferencias estadisticas crean grupos que se pueden representar con letras para ello podemos usar la funcion annotate
+ 
+```{r}
+ggplot(CO2,aes(x= Type, y = uptake, fill = Treatment))+
+  geom_boxplot()+
+  scale_fill_manual(name= " Tretament",
+                    values= c("darkgreen", "pink"))+
+  annotate(geom = "text", x =0.8, y = 48, label = "a",
+           color="darkred", size = 4.5, fontface=2)+ #fontface negrita
+  annotate(geom = "text", x =1.2, y = 48, label = "a",
+           color="darkred", size = 4.5, fontface=2)+
+  annotate(geom = "text", x =1.8, y = 40, label = "ab",
+           color="darkred", size = 4.5, fontface=2)+
+  annotate(geom = "text", x =2.2, y = 25, label = "b",
+           color="darkred", size = 4.5, fontface=2)
+
+```
+
+## Barras diferencia estadistica
+
+Sin embargo, muchas veces tambien conviene agregar mas infromacion sobre dichas diferencias. Para ello usamos el paquete ggsignif. Este paquete nos ayuda a agregar especificamente las comparaciones entre cada tratamiento
+
+```{r}
+ggplot(CO2,aes(x= Type, y = uptake, fill = Treatment))+
+  geom_boxplot()+
+  scale_fill_manual(name= " Tretament",
+                    values= c("green", "orange"))+
+  geom_signif(y_position = 48, xmin = 0.55, xmax = 1.4,
+              annotation = "NS", tip_length = 0.01,
+              col= 1, # color
+              textsize = 3.2)+
+  geom_signif(y_position = 37, xmin = 1.53, xmax = 2.4,
+              annotation = "p<0.05", tip_length = 0.01,
+              col= 1)+
+  geom_signif(y_position = 53, xmin = 0.53, xmax = 2,
+              annotation = "NS", tip_length = 0.01,
+              col= 1)
+
+```
+
+## 0 ambas
+```{r}
+ggplot(CO2,aes(x= Type, y = uptake, fill = Treatment))+
+  geom_boxplot()+
+  scale_fill_manual(name= " Tretament",
+                    values= c("green", "orange"))+
+  geom_signif(y_position = 48, xmin = 0.55, xmax = 1.4,
+              annotation = "NS", tip_length = 0.01,
+              col= 1, # color
+              textsize = 3.2)+
+  geom_signif(y_position = 37, xmin = 1.53, xmax = 2.4,
+              annotation = "p<0.05", tip_length = 0.01,
+              col= 1)+
+  annotate(geom = "text", x =1, y=55, label="a",
+           color="darkred", size = 4.5, fontface= 2)+
+  annotate(geom = "text", x =2, y=48, label="b",
+           color="darkred", size = 4.5, fontface= 2)
+
+```
+
+## Ejercicio final
+
+Carguen nuevamente sus graficos de comp_soil y van a crear dos graficos: uno agregando grupos con letras y otro con barras de diferencias. Ahorita haganlo a ojo no necesito que calculen las diferencias estadisticas reales
+
+Presenten los graficos uno a lado del otro usando patchwork
+
+```{r}
+
+letras <- ggplot(Comp_soils,aes(x = Temperature, y = SRP.ugL, fill = Soil))+
+  geom_boxplot()+
+  theme(legend.position = "bottom")+  
+  xlab("Temperatura") + 
+  ylab("Medicion SRP") +
+  ylim(c(.5,15)) +
+  ggtitle("Composicion Suelo") +
+  theme(plot.title = element_text(hjust = .5, face = "bold"),
+        legend.title = element_text(color= "red",
+                                    size = 12,
+                                    face = "bold"))+
+  scale_fill_manual(name= "Soil",
+                    values= c("aquamarine", "hotpink"))+
+  annotate(geom = "text", x =0.8, y = 5, label = "a",
+           color="darkblue", size = 4.5, fontface=2)+ 
+  annotate(geom = "text", x =2.2, y = 5, label = "a",
+           color="darkblue", size = 4.5, fontface=2)+
+  annotate(geom = "text", x =1.2, y = 15, label = "b",
+           color="darkblue", size = 4.5, fontface=2)+
+  annotate(geom = "text", x =1.77, y = 4, label = "c",
+           color="darkblue", size = 4.5, fontface=2)
+
+
+barras <- ggplot(Comp_soils,aes(x = Temperature, y = SRP.ugL, fill = Soil))+
+  geom_boxplot()+
+  theme(legend.position = "bottom")+  
+  xlab("Temperatura") + 
+  ylab("Medicion SRP") +
+  ylim(c(.5,15)) +
+  ggtitle("Composicion Suelo") +
+  theme(plot.title = element_text(hjust = .5, face = "bold"),
+        legend.title = element_text(color= "red",
+                                    size = 12,
+                                    face = "bold"))+
+  scale_fill_manual(name= "Soil",
+                    values= c("aquamarine", "hotpink"))+
+  geom_signif(y_position = 14.7, xmin = 0.52, xmax = 1.4,
+              annotation = "p<0.05", tip_length = 0.01,
+              col= 1, # color
+              textsize = 3.2)+
+  geom_signif(y_position = 5, xmin = 1.6, xmax = 2.4,
+              annotation = "p<0.05", tip_length = 0.01,
+              col= 1,
+              textsize = 3.2)
+
+
+letras | barras
 
 ```
 
