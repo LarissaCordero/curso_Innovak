@@ -1,0 +1,54 @@
+---
+title: "Proyecto"
+author: "Larissa Cordero"
+date: "2023-10-20"
+output: html_document
+---
+
+```{r}
+Estanque_de_plantas <- read.csv("~/capR/curso/curso_Innovak/Material_clase/Estanque_plantas.csv")
+
+library(dplyr)
+
+```
+
+## Ejercicio
+
+Determinar si existe una correlación entre la biomasa de dos especies acuáticas de plantas en estanques de Alaska: Carex y Artophila, usando datos modernos.
+
+```{r}
+
+### Seleccionar columnas que vamos a utilizar para el analisis ###
+
+Tmodificada <- Estanque_de_plantas[,c("Era", "Artophila", "Carex")]
+
+Modificada <- Tmodificada %>%
+  filter(!is.na(Artophila),!is.na(Carex)) %>%
+  select(Era, Artophila, Carex)
+   
+
+### Verificar si cumple con las funciones 
+
+plot(Modificada$Artophila,Modificada$Carex)
+
+
+## Correlacion 
+
+cor.test(Modificada$Artophila,Modificada$Carex)
+
+print(cor.test(Modificada$Artophila,Modificada$Carex))
+
+#### Resultados
+
+#### El cofeifiente de correlación da un valor de 0.6625044 y el p-value =0.001996, por lo que se considera que la correlación es significativa ya que para considerar eso es necesario que el valor de p-value sea <0.05
+
+
+
+```
+
+
+
+
+
+
+
