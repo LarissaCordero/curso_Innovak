@@ -1,0 +1,128 @@
+---
+title: "Phyloseq_analizarmicrobiomasconR"
+output: html_notebook
+---
+
+Nuestro pipeline de DADA2 nos da como resultado 2 tablas: el conteo de las secuencias (abundancias) y la tabla de asignacion taxonomica. Ademas de ello, tenemos los datos de las caracteristicas de nuestras muestras, es decir los metadatos: Tipos de muestra, lugar, tratamientos, cultivos, etc. Tratar de balancear toda esta informacion al momento de analizar nuestros datos puede ser una tarea dificil por lo que R tiene un paquete para ello: __Phyloseq__
+
+Phyloseq es un paquete que ayuda a importar, almacenar, analizar y presentar graficamente datos de secuenciacion filogenetica que ya ha sido agrupada en OTUs o ASVs. Especialmente ayuda cuando ya esta asociada a datos de la muestra, arboles filogeneticos,y tablas de asignacion taxonomica agrupandolos en un solo objeto. Usando este objeto se pueden implementar otras herramientas disponibles en R para el analisis filogenetico.
+
+Algunos ejemplos:
+
+* Importar datos de denoising pipelines como DADA2, pero existen mas (es lo que haremos hoy)
+
+* Analisis de diversidad: metodos de distancias y ordinacion
+
+* Graficos de microbioma usando ggplot 2 (osea depues se pueden modificar con lo que ya aprendimos)
+
+* Manejos, calculos y modificaciones de objetos phyloseq
+
+# Instalacion
+
+## 1. Bioconductor 
+
+```{r}
+source('http://bioconductor.org/biocLite.R') # este no sirve
+biocLite('phyloseq') # esto es para versiones mas viejas en R
+
+BiocManager::install("phyloseq") # este si sirve
+
+```
+
+#Librerias y datos
+
+```{r}
+
+library(phyloseq)
+
+load("taxa_ch.RData") #identificacion taxonomica
+load("seq_conteos.RData") #abundancia ASVs
+
+# Metadatos: nosotros haremos la tabla
+
+metadatos <- data.frame(Tratamiento = c(rep("Tratamiento", 3), "Testigo"),
+                        Tipo_suelo = c ("Rizosfera", "Rizosfera","Rizosfera", "suelo"))
+
+row.names(metadatos) <- sample_names
+
+```
+
+
+## Preparando los datos
+
+Si bien nuestras matrices ya estan listas para usarse hay algunas modificaciones que son necesarias para crear nuestro objeto de phyloseq
+
+## Abundancia de ASVs
+
+```{r}
+
+sample_names <- c("CH7","CH8", "CH9", "CH10")
+
+row.names(seqtab.nochim) <- sample_names
+
+
+```
+
+Sin embargo nuestras columnas se siguen llamando por nuestras secuencias. Esto quiere decir que tiene nombres super largos y que al momento de analizar se nos a complicar , por ellos hay dos metodos para modificar los nombres de sus secuencias:
+
+```{r}
+### Generar codigos aleatorios como nombres de las columnas
+
+rando <- function(n = 5000) {
+  a <- do.call(paste0, replicate(5, sample(LETTERS, n, TRUE), FALSE))
+  paste0(a, sprintf("%04d", sample(9999, n, TRUE)), sample(LETTERS, n, TRUE))
+}
+
+
+dim(seqtab.nochim)
+seqnames <- rando(1764)
+
+# Guardar las secuencias en otro objeto antes de borrarlas
+
+Secuencias <- colnames(seqtab.nochim)
+write.csv(Secuencias, "~/capR/curso/curso_Innovak/Material_clase/Secuencias.csv")
+
+# cambiando nombre con codigo
+colnames(seqtab.nochim) <- seqnames
+
+### nombrarlas de manera ordinal
+
+colnames(seqtab.nochim) <- c(paste0("Seq_", as.character(1:1764)))
+
+# Guardar tabla
+write.csv(seqtab.nochim,"~/capR/curso/curso_Innovak/Material_clase/Tabla_ASVs.csv")
+
+```
+
+### Tabla de asignacion taxonomica
+
+Para que nuestras tabla se puede unir y analizarse juntos dentro del objeto de phyloseq necesitamos tener los mismos nombre para    nuestras variables, por ellos ahora tenemos qye cambiar los nombres de las filas de nuestra tabla de txa (Que son las secuencias que acabamos de quitar) al codigo o nombre que le dimos en la parte de arriba:
+
+
+```{r}
+row.names(taxa) <- seqnames # con codigos
+
+row.names(taxa) <- c(paste0("Seq_", as.character(1:1764))) # numeros pero este no lo use 
+
+#Guardar tabla
+
+write.csv("~/capR/curso/curso_Innovak/Material_clase/taxa.csv")
+
+
+```
+
+Ahora si todo listo para armar nuestro objeto y usarlo para todo tipo de analisis
+
+```{r}
+
+suelo_ch <- phyloseq(otu_table(seqtab.nochim,
+                               taxa_are_rows = FALSE),
+                     sample_data(metadatos),
+                     tax_table(taxa))
+
+# y no olvidar guardar
+
+save(suelo_ch, file = "Suelo_chiapas.RData")
+                     
+```
+

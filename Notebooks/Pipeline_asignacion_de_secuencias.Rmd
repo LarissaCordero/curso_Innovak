@@ -221,6 +221,7 @@ load("errR.RData")
 plotErrors(errF, nominalQ= TRUE)
 plotErrors(errR, nominalQ= TRUE)
 
+
 ```
 
 * Los graficos de error muestran las tasas de error para cada posible transicion (A→C, A→G, …). Los puntos son las tasas de error observadas para cada puntuacion de calidad. 
@@ -252,9 +253,15 @@ dadaFs_nopool <- dada(filtFs, err= errF, multithread = TRUE,
                       pool= FALSE)
 save(dadaFs_nopool, file ="dadaFs_nopool.RData")
 
+#por si lo cerraron
+load("dadaFs_nopool.RData")
+
 #reverse
 dadaRs_nopool <- dada(filtRs, err=errR, multithread = TRUE)
 save(dadaRs_nopool, file = "dadaRs_nopool.RData")
+
+# por si lo cerraron 
+load("dadaRs_nopool.RData")
 
 
 ```
@@ -271,6 +278,9 @@ Desafortunadamente es hasta este paso donde se pueden dar cuenta si su proceso d
 
 mergers <- mergePairs(dadaFs_nopool, filtFs, dadaRs_nopool, filtRs, verbose = TRUE)
 save(mergers, file = "mergers.RData")
+
+# por si lo cerraron
+load("mergers.RData")
 
 ```
 
@@ -299,3 +309,113 @@ table(nchar(getSequences(seqtab)))
 ```
 
 Otro paso importante despues de unir nuestras secuencis es checar su ongitud. Dado qu een teoria estas secuencias son v3 y en nuestros graficos vimos que tenian 300 bases, ninguna de nuestras muestras unidas deberian sobrepasar ese valor 
+
+
+# Quitar quimeras
+
+En secuenciacion las quimeras son secuencias de ADN que se originan cuando pedazos de ADN se unen cuando no deberian. Tambien durante el proceso de amplificación por PCR se pueden producir secuencias quiméricas, secuencias que no son productos reales de la amplificación del gen 16S. Dado que estas uniones y productos son artificales y no representan secuencias biologicas reales deben ser eliminadas.
+
+Hasta este momento el pipeline de DADA ya corrigio por sustitucion y otros tipos de errores pero las quimeras se mantienen.Afortunadamente despues del demoising es muy sencillo identificar las quimeras de las secuencias ya que el codigo las identifica si las secuencias pueden ser reconstruidas combinando segmentos izquieros y derechos de las secuencias "madre" mas abundantes
+
+```{r}
+seqtab.nochim <- removeBimeraDenovo(seqtab, method = "consensus",
+                                    multithread= TRUE, verbose =  TRUE) # si tarda un poco en correr
+
+#Añadir a reporte
+
+save(seqtab.nochim, file = "seq_conteos.RData")
+
+# 9103 secuencias e identifico  7339/9103
+#basados en esto el 80% de mis secuencias son quimeras
+
+##  Comparar esta tabla con la orginal que incluye quimeras
+dim(seqtab.nochim)
+
+#incluyendo abundancias
+sum(seqtab.nochim)/sum(seqtab) # porcentaje de secuencias no quimericas que se mantuvieron 
+
+#tomando en cuenta abundancias en realidad mantuvimos 28% de nuestras lecturas
+
+
+```
+Al dividir la suma de ambas tablas obtenemos el porcentaje de secuencias no quimericas que mantuvimos tomando en cuenta la abundancia
+
+La frecuencia de secuencias quimericas varia sustancialmente entre tipos de datos y depende de factores como procesamiento experimental de las muestras e incluso la complejidad de la mismas. Como les mencione antes las quimeras pueden salir como resultado de procesos experimentales o al momento de procesar las secuencias.
+
+En este caso para ver el porcentaje de quimeras comparamos las dimensiones de la tabla original con la tabla sin quimeras. Sin embargo, con nuestro ultimo codigo ya tomamos en cuenta abundancia y ahi vemos cual es el porcentaje verdadero
+
+En futuros analisis deben considerar que la mayor parte de sus lecturas (tomando en cuenta abundancia) deberia mantenerse despues de remover quimeras. Aunque tampoco es tan raro que la mayor parte de los ASVs sean removidos (a mi no me ha tocado y esperemos que a ustedes tampoco). Si la mayor parte de sus lecturas se quitan ya que estan consideradas como quimeras modifiquen alguna parte del pipeline para minimizar esos errores. Como recomendacion esto ocurre en la mayoria de los casos esto ocurre porque las secuencias de los primers tienen nucleotidos ambiguos que no fueron removidos antes de empezar 
+el DADA2 pipeline.
+
+Recuerden siempre preguntar si sus muestras vienen sin primers!!!
+
+# Seguimiento del proceso
+
+Antes de terminar y asignar taxonomia a nuestra tabla final, es bueno hacer un recuento del proceso de filtrado. Sin duda ustedes deberan de incluir esta tabla en sus reportes y tener justificacion para cada paso de filtrado.
+
+Recuerdan que guardamos el archivo de out? Lo vamos a usar en esta parte:
+
+```{r}
+out <- read.csv("~/capR/curso/curso_Innovak/Material_clase/Conteo_reads3.csv")
+
+# Primero crearemos una funcion
+getN <- function(x) sum(getUniques(x))
+# esta funcion va a sumar el numero de valores unicos dentro de x (x son nuestros objetos de R creados en cada paso)
+
+# Creamos una nueva tabla llamada track
+track <- cbind(out, # Paso1: filtrado y corte
+               sapply(dadaFs_nopool, getN), #paso2:calculamos errores dentro de dada
+               sapply(dadaRs_nopool, getN),# paso3: denoising
+               sapply(mergers, getN),#paso4: unir muestras
+               rowSums(seqtab.nochim)) #paso5: quitar quimeras
+
+# Nombramos nuestras filas y columnas
+colnames(track) <- c("Sample_names","input", "filtered", "denoisedF", "denoisedR", "merged", "nonchim")
+
+rownames(track) <- sample.names # no siempre es necesario
+
+#guardamos esta tabla
+
+write.csv(track, "~/capR/curso/curso_Innovak/Material_clase/Seguimiento_dada.csv") # para guardar una tabla
+
+
+```
+
+# Asignar taxonomia
+
+Si bien ya con estos pasos contamos cuantos microbios estan en nuestras muestras ahora toca saber CUALES son estos microbios. El paquete DADA2 implementa un metodo Bayesiano de clasificacion (naive Bayesian classifier method).
+
+La funcion _assignTaxonomy_ tomara nuestra tabla de conteos con las secuencias y un set de secuencias de referencia con taxonomia ya conocida (bases de datos) y nos dara como resultado la asignacion taxonomica con un intervalo de confianza de bootstrap _(minBoot)_. Yo este valor siempre lo dejo con el valor default pero sepan que se puede cambiar.
+
+Con DADA2 se pueden usar las bases de datos RDP, GreenGenes (97%) y Silva; aunque tambien hay otras bases de datos especificas para protistas y ambientes especificos si alguna vez llegaran a ocuparlas. La seleccion de base de datos afecta en gran medida la identificacion de taxonomia. En esta clase vamos a comparar RPD y Silva ya que son las mas comunes para usarse. En un futuro tendran que ponerse de acuerdo para usar la misma base de datos para TODOS sus analisis ya que busca consistencia.
+
+En un analisis previo que yo hice con mis muestras para comporar ambas bases de datos Silva identificaba mas taxa en los niveles taxonomicos superiores (menos no identificados) pero ya al llegar a genero porcentaje de identificacion era casi igual con RDP. Asimismo hice una revision de literatura super rapida basada en asignacion de taxonomia en ecologia de suelos por lo que YO decidi usar __Silva v138__ Ademas por si tenian la duda NO no se puede combinar la asignacion de dos bases de datos no es una practica comun y seria complicadisimo.
+
+Bases de datos 
+
+* [Silva](https://zenodo.org/records/4587955)
+
+* [RDP](https://zenodo.org/records/4310151)
+
+
+```{r}
+taxa <- assignTaxonomy(seqtab.nochim,                     "~/capR/curso/curso_Innovak/Secuenciacion/Taxa/silva_nr99_v138.1_train_set.fa.gz", multithread = TRUE)
+
+```
+
+Si inspeccionan la taxonomia asignada y ven que existen muchos errores. Por ejemplo que las secuencias sean asignadas como Eukaryota NA NA NA NA NA NA, las lecturas pueden estar en sentido opuesto a los de la base de referencia. Pueden intentar asignar taxonomia usando orientacion opuesta agregando assignTaxonomy(..., tryRC =TRUE)
+
+
+## Añadir especies
+
+Auinque al nivel que van a trabajar no va ser tan necesario , DADA2 tmbien implementa un metodos de asginacion de especies basado en alineacion exacta entre nuestros ASVs y las secuencias de referencia, basado en  analisis previos, Sin embargo es importante notar que esta funcion solo funciona con SIlva y RDP
+
+```{r}
+taxa <- addSpecies(taxa,"~/capR/curso/curso_Innovak/Secuenciacion/Taxa/silva_species_assignment_v138.1.fa.gz")
+
+save(taxa, file = "taxa_ch.RData")
+
+```
+
+Como es de esperarse casi no van a haber identificaciones de especies pero tome en cuenta que es una opcion posible
+
