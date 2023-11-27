@@ -1,0 +1,180 @@
+---
+title: "Herramientas Phyloseq"
+output: html_notebook
+---
+
+# Ejercicio recapitulacion 
+
+Como guardar las tablas como objeto phyloseq
+
+```{r}
+
+library(phyloseq)
+
+#Paso 1: subir tablas DADA
+
+load("taxa_ch_p2.RData") #identificacion taxonomica
+load("seq_conteosR2.RData") # abundancia ASVS
+
+# Paso 2: metadatos: Nosotros haremos la tabla
+
+metadatos <- data.frame(Tratamiento = "Sin bioestimulante", 
+                        Tipo_suelo =  "Salino")
+row.names(metadatos) <- "S83"
+
+# PASO 3: Renombrar muestras
+
+row.names(seqtab.nochim) <- "S83"
+
+# paso 4: cambiar nombres de secuencias
+
+rando <- function(n = 5000) {
+  a <- do.call(paste0, replicate(5, sample(LETTERS, n, TRUE), FALSE))
+  paste0(a, sprintf("%04d", sample(9999, n, TRUE)), sample(LETTERS, n, TRUE))
+}
+
+
+dim(seqtab.nochim) # aqui arroja un numero que va ser el que va a ir en el codigo siguiente
+seqnames <- rando(3177) # aqui va el resultado de la funcion anterior
+
+# Guardar las secuencias en otro objeto antes de borrarlas
+
+Secuencias <- colnames(seqtab.nochim)
+write.csv(Secuencias, "~/capR/curso/curso_Innovak/Material_clase/Secuenciasv3.csv")
+
+# cambiando nombre con codigo
+colnames(seqtab.nochim) <- seqnames
+
+# Paso 5: cambiar el nombre a las secuencias en taxa
+
+row.names(taxa) <- seqnames #codigos
+
+# PASO FINAL
+
+vid_bio <- phyloseq(otu_table(seqtab.nochim,
+                               taxa_are_rows = FALSE),
+                     sample_data(metadatos),
+                     tax_table(taxa))
+
+# Guardar con tu numero de muestra 
+
+save(vid_bio, file = "VidS83.RData")
+
+```
+
+
+# Introduccion 
+
+Como vimos antes de irnos phyloseq nos ayuda a integrar todos nuestros datos en un objeto para poder analizarlo. La clase de hoy vamos a ver como phyloseq nos deja modificar estos objetos para visualizarlos mejor y seguir con los diferetnees tipo de analisis 
+
+```{r}
+library(phyloseq)
+
+load("VidS83.RData") # siempre empezar con el objeto phyloseq
+
+```
+
+# Las primeras visualizaciones de nuestros datos
+
+```{r}
+
+#Redes
+net <- make_network(vid_bio, "samples", max.dist = 0.3)
+
+plot_network(net, vid_bio, color = "Tratamiento", shape = "Tipo_suelo", line_weight = 0.3, label=NULL)
+
+plot_bar(vid_bio, fill = "Phylum")
+
+plot_heatmap(vid_bio, taxa.label = "Phylum")
+
+```
+Si bien con estos datos ya podemos realizar graficos que nos acercan mas al analisis el hecho es de que siempre es conveniente pre-procesar los datos antes de cualquier grafico. Por ellos phyloseq nos ofrece varias herramientas:
+
+# Procesamiento de datos
+
+## Filtrado
+
+```{r}
+# Porque tres muestras?
+
+PS_filtered <- filter_taxa(vid_bio,# objeto
+                           function(OTU) sum(OTU) > 2, #condicion o funcion porque las muestras se hicieron por triplicado, por lo menos en 2 
+                           TRUE) #cortar o no para crear nuevo objeto (siempre dejar en TRUE)
+
+# remover taxa no identificada
+
+PS_filtered <- subset_taxa(PS_filtered, # objeto
+                           !is.na(Phylum)) # condicion 
+
+```
+
+### Prume vs Subset
+
+```{r}
+
+# usando datos de la tabla de taxa
+
+Actino <- subset_taxa(vid_bio, # objeto
+                      Phylum=="Actinobacteriota") # la condicion puede ser cualquier nivel de la jerarquia taxonomica 
+
+# usando abundancias quitar muestras 
+
+Actino <- prune_samples(sample_sums(Actino)>=50, # condicion, dejara las de mayor de 50 
+                        Actino) # objeto
+
+
+```
+
+## Union o merge
+
+```{r}
+# Uniendo muestras
+
+Tratamientos <- merge_samples(vid_bio, # objeto
+                              "Tratamiento") # condicion de metadatos
+
+# Uniendo taxa
+
+Actino_m <- merge_taxa(Actino, taxa_names(Actino)[1:5]) # Por numero
+
+# Uniendo por jerarquia de aglomerar
+
+PS_glom <- tax_glom(PS_filtered, # objeto
+                    taxrank = "Genus", # nivel de jerarquia 
+                    NArm = FALSE) # no quita los valores que son falsos
+# uniendo phyloseqs
+
+Merge_p <- merge_phyloseq(Actino, Desulf)
+
+
+```
+
+### Ejercicio
+
+Unir las muestras de todos
+
+```{r}
+
+# como todos se llamaban igul, al mometo de subir tuvimos que renombrarlas antes de subir la siguiente 
+
+load("VidS83.RData")
+V3 <- vid_bio
+
+load("VidS81.RData")
+V1 <- vid_bio
+
+load("Vs82.RData")
+V2 <- vid_bio
+
+load("Vid_S85.RData")
+V5 <- vid_bio
+
+vid_bio <- merge_phyloseq(V1, V2, V3, V5)
+
+```
+
+
+
+
+## Abundancia relativa
+

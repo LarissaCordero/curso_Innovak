@@ -1,0 +1,328 @@
+---
+title: "Proyecto2"
+output:
+  html_notebook: default
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+# Librería
+
+```{r}
+library(dada2) 
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(patchwork)
+library(RColorBrewer)
+library(ggbreak)
+library(plotrix)
+library(ggsignif)
+
+```
+
+# Gráfica
+
+```{r}
+Muestras_peru <- read.csv("~/capR/curso/curso_Innovak/Proyecto2/Grafico/Muestras_peru.csv")
+
+ggplot(Muestras_peru,aes(x = Variedad, y = Hongos_totales, fill = Tipo_muestra))+
+  geom_boxplot()+
+  theme(legend.position = "bottom")+  
+  xlab("Variedad") + 
+  ylab("Hongos totales") +
+  ggtitle("Cuantificación Hongos en VID") +
+  theme(plot.title = element_text(hjust = .5, face = "bold", color = "olivedrab4"),
+        legend.title = element_text(color= "antiquewhite4",
+                                    size = 10,
+                                    face = "bold"))+
+  scale_fill_manual(name= "Muestra",
+                    values = c("coral","orchid3"))+
+  annotate(geom = "text", x =0.82, y = 4.25e+06, label = "a",
+           color="dodgerblue4", size = 4.5, fontface=2)+ 
+  annotate(geom = "text", x =2.2, y = 4.7e+06, label = "b",
+           color="dodgerblue4", size = 4.5, fontface=2)+
+  annotate(geom = "text", x =1.2, y = 5.1e+06, label = "b",
+           color="dodgerblue4", size = 4.5, fontface=2)+
+  annotate(geom = "text", x =1.81, y = 3.35e+06, label = "a",
+           color="dodgerblue4", size = 4.5, fontface=2)
+
+
+
+```
+
+# Seleccion y preparacion de archivos
+
+```{r}
+
+## Fijar el camino al directorio donde estan mis muestras
+
+path <- "~/capR/curso/curso_Innovak/Secuenciacion_proyecto2/" 
+
+list.files(path)
+
+## Ahora leeremos los nombres de nuestras muestras y los separaremos en objetos entre forward y reverse reads 
+
+# forward
+
+fnFs <- sort(list.files(path, pattern = "_R1_001.fastq.gz", full.names = TRUE))
+
+# REVERSE
+
+fnRs <- sort(list.files(path, pattern = "_R2_001.fastq.gz", full.names = TRUE))
+
+
+```
+
+```{r}
+
+## Extract sample names 
+
+sample.names <- sapply(strsplit(basename(fnFs), "_"), `[`,1) # Este codigo funciona dependiendo de como estan escrito el nombre de sus datos
+
+
+```
+
+# Inspeccionar perfiles de calidad
+
+```{r}
+#forward
+
+F_pc <- plotQualityProfile(fnFs[1]) # buen calidad cortar a 260
+
+
+# reverse
+
+R_pc <- plotQualityProfile(fnRs[1]) # cortar a 200
+
+
+```
+En esta parte se ve la calidad de las muestras, en este caso la muestra forward decidí cortar en 260, basandome en el número de bases que tenemos por secuencia entre 30-40 cuando empieza a caer menor a 30 ya que es cuando la calidad de la muestra no es tan buena, fijandome en la línea verde y naranja donde empezaron a caer los picos.
+
+El 260 lo decidí en el segundo intento de corte, ya que en el primero había puesto 240 y al final que corrí todo, hubo muy pocas lecturas (352) por lo cual decidí ampliar un poco más, aún donde no se viera muy bajo los picos y lo deje en 260. 
+ 
+En la muestra reverse empieza a caer los picos a partir del 200 y es por eso que deje ese corte. Y
+
+Estos cortes se realizan con el fin de disminuir el numero de errores, ya que al momento de secuenciar generalmente los últimos nucleotidos ya son de baja calidad.
+
+
+# Filtrar y cortar 
+
+Primero se creó una carpeta donde van a estar nuestras muestras filtradas
+
+```{r}
+
+# Guardando el camino a nuestras muestras filtradas en un objeto nuevo
+
+filtFs <- file.path(path, "filtered", paste0(sample.names, "_F_filt.fastq.gz")) #forward
+filtRs <- file.path(path, "filtered", paste0(sample.names, "_R_filt.fastq.gz")) #reverse
+
+# Asignando los nombres de las muestras a nuestros objetos nuevos
+
+names(filtFs) <- sample.names
+names(filtRs) <- sample.names
+
+```
+
+Aquí es importante tomar en cuenta como se removeran las lecturas:
+
+*`truncQ= 2` le deje el 2 ya que es el de buena calidad
+
+* `maxN=0` remueve las lecturas que tenga nucleotidos no reconocidos  
+
+* `truncLen` Aquí es el paso donde se pone en donde cortar para saber el numero de bases que se van a dejar, yo aquí establecí 260,200.
+
+* `maxEE=c(,)` Es establecer los errores esperados, en esta ocasión decidí dejar (5,5) ya que la momento de ponerme más estricta y bajar el parametro a (2,5), bajaba mucho el número de lecturas.
+
+```{r}
+out <- filterAndTrim(fnFs, filtFs,# forward reads
+                     fnRs, filtRs, # reverse reads
+                     truncLen = c(260,200), # truncado o corte
+                     maxN=0, #remover Ns NUNCA SE MODIFICA
+                     maxEE=c(5,5), # error espero numero mas chico mas estrico
+                     truncQ = 2, #quality score
+                     rm.phix = TRUE, compress = TRUE, # defaults
+                     multithread = FALSE) # en windows multithread =false
+
+```
+
+
+```{r}
+# Ahora a guardar el progreso 
+
+write.csv(out, "~/capR/curso/curso_Innovak/Proyecto2/conteo_reads_proyecto2.csv")
+
+### por si queremos retomar después de filtrar ###
+
+## nuevo camino
+path2 <- "~/capR/curso/curso_Innovak/Secuenciacion_proyecto2/filtered/"
+
+# Forward
+filtFs <- sort(list.files(path2, pattern="_F_filt.fastq.gz", full.names = TRUE))
+
+#reverse
+filtRs <- sort(list.files(path2, pattern="_R_filt.fastq.gz", full.names = TRUE))
+
+```
+
+Esta parte estima que tan probable es que una base en realidad sea otra, obteniendo la tasa de error.
+
+```{r}
+#Forward
+errF <- learnErrors(filtFs, multithread = TRUE)
+save(errF,file="errF_Proyecto2.RData") 
+
+#reverse
+errR <- learnErrors(filtFs, multithread = TRUE)
+save(errR,file="errR_Proyecto2.RData")
+
+# Para subir los archivos nuevamente
+load("errF_Proyecto2.RData")
+load("errR_Proyecto2.RData")
+
+# plot error rates
+plotErrors(errF, nominalQ= TRUE)
+plotErrors(errR, nominalQ= TRUE)
+
+
+```
+Para la interpretación de los gráficos de error es importante observar la línea negra (tasa de error estimada) se mantenga y que este sobre la línea roja (tasas de error esperadas) y está última vaya disminuyendo
+
+
+#Inferencia de la muestra
+
+En esta parte es donde se retiran todos los errores de secuenciacion para dejar unicamente los miembros reales de la comunidad que fue secuenciada
+
+```{r}
+# Forward
+dadaFs_nopool <- dada(filtFs, err= errF, multithread = TRUE,
+                      pool= FALSE)
+save(dadaFs_nopool, file ="dadaFs_nopoolP2.RData")
+
+#por si lo cerraron
+load("dadaFs_nopoolP2.RData")
+
+#reverse
+dadaRs_nopool <- dada(filtRs, err=errR, multithread = TRUE)
+save(dadaRs_nopool, file = "dadaRs_nopoolP2.RData")
+
+# por si lo cerraron 
+load("dadaRs_nopool.RData")
+
+
+```
+# Unir las lecturas forward y reverse
+
+Aquí se unen las lecturas conforme al corte que se estableció anteriormente, # Uniendo las lecturas forward y también se ve cuantos pares serán rechazados.
+
+```{r}
+
+mergers <- mergePairs(dadaFs_nopool, filtFs, dadaRs_nopool, filtRs, verbose = TRUE,
+                      minOverlap = 10, #trata de reducir para ver si se incrementan las uniones
+                      maxMisMatch = 2, # Parametros opcionales, #default es 0,  puede que las secuencias no vengan muy bien por eso lo añadimos, no ponerle mas de 5
+                      justConcatenate = TRUE,# Forward NNNNX10 reverse
+                      returnRejects = TRUE) # les da la tabla de reads rechazadas al momento de union , empezar por este y luego misMatch
+
+save(mergers, file = "mergersP2.RData")
+
+# por si se cerro 
+load("mergersP2.RData")
+
+```
+
+```{r}
+## Tabla de secuencia
+
+seqtab <- makeSequenceTable(mergers)
+dim(seqtab) # numero de muestras x numero de ASVs
+
+# checar la longitud de secuencias
+
+table(nchar(getSequences(seqtab)))
+```
+Checar la longitud de las secuencias nos sirve para verificar que no pasen del número de bases que vimos en los primeros gráficos que eran 300, aquí se observa que algunas si pasan del 300
+
+# Quimeras
+
+Se quitan pedazos de ADN que se unieron cuando no debían 
+
+```{r}
+seqtab.nochim <- removeBimeraDenovo(seqtab, method = "consensus",
+                                    multithread= TRUE, verbose =  TRUE) # si tarda un poco en correr
+
+#Añadir a reporte
+
+save(seqtab.nochim, file = "seq_conteosR2.RData")
+
+# 11718 secuencias e identifico  8541/11718
+#basados en esto el 72% de mis secuencias son quimeras
+
+##  Comparar esta tabla con la orginal que incluye quimeras
+dim(seqtab.nochim)
+
+#incluyendo abundancias
+sum(seqtab.nochim)/sum(seqtab) # porcentaje de secuencias no quimericas que se mantuvieron 
+
+#tomando en cuenta abundancias en realidad mantuvimos 51% de nuestras lecturas
+
+
+```
+El porcetanje de secuencias no quimericas es 51%, es decir que es el porcentaje de nuestras lecturas que se mantuvieron. 
+
+
+# Seguimiento del proceso
+
+```{r}
+out <- read.csv("~/capR/curso/curso_Innovak/Proyecto2/conteo_reads_proyecto2.csv")
+
+# Primero crearemos una funcion
+getN <- function(x) sum(getUniques(x))
+
+
+# Creamos una nueva tabla llamada track
+track <- cbind(out, # Paso1: filtrado y corte
+               getN(dadaFs_nopool), #paso2:calculamos errores dentro de dada
+               getN(dadaRs_nopool),# paso3: denoising
+               getN(mergers),#paso4: unir muestras
+               rowSums(seqtab.nochim)) #paso5: quitar quimeras
+
+# Nombramos nuestras filas y columnas
+colnames(track) <- c("Sample_names","input", "filtered", "denoisedF", "denoisedR", "merged", "nonchim")
+
+rownames(track) <- sample.names # no siempre es necesario
+
+#guardamos esta tabla
+
+write.csv(track, "~/capR/curso/curso_Innovak/Proyecto2//Seguimiento_dada.csv") # para guardar una tabla
+
+```
+
+Está tabla es un resumen del proceso, en ella nos arroja los siguientes valores:
+
+*Input: Número de lecturas obtenidas de la muestra 
+*Filtered: Número de lecturas ya filtradas 
+*Denoised:Quitar todos los errores
+*Merged:Unir las muestras
+*Nonchim:Quitar quimeras 
+
+
+# Asignar taxonomía
+
+```{r}
+taxa <- assignTaxonomy(seqtab.nochim,                     "~/capR/curso/curso_Innovak/Secuenciacion/Taxa/silva_nr99_v138.1_train_set.fa.gz", multithread = TRUE)
+
+```
+
+Viendo la tabla donde aparecen los géneros, la mayoría si tiene a cual pertenece, pero si aparecen algunos con NA.
+
+# Asignar especies
+
+Está parte no es necesaria, pero quería verificar si me daría alguna especie pero en este caso no se encontraron, por lo que aparece NA.
+
+```{r}
+taxa <- addSpecies(taxa,"~/capR/curso/curso_Innovak/Secuenciacion/Taxa/silva_species_assignment_v138.1.fa.gz")
+
+save(taxa, file = "taxa_ch_p2.RData")
+
+```

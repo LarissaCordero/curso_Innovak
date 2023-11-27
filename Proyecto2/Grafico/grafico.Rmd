@@ -1,0 +1,32 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+Muestras_peru <- read.csv("~/capR/curso/curso_Innovak/Proyecto2/Grafico/Muestras_peru.csv")
+
+ggplot(Muestras_peru,aes(x = Variedad, y = Hongos_totales, fill = Tipo_muestra))+
+  geom_boxplot()+
+  theme(legend.position = "bottom")+  
+  xlab("Variedad") + 
+  ylab("Hongos totales") +
+  ggtitle("Cuantificación Hongos en VID") +
+  theme(plot.title = element_text(hjust = .5, face = "bold", color = "olivedrab4"),
+        legend.title = element_text(color= "antiquewhite4",
+                                    size = 10,
+                                    face = "bold"))+
+  scale_fill_manual(name= "Muestra",
+                    values = c("coral","orchid3"))+
+  annotate(geom = "text", x =0.82, y = 4.25e+06, label = "a",
+           color="dodgerblue4", size = 4.5, fontface=2)+ 
+  annotate(geom = "text", x =2.2, y = 4.7e+06, label = "b",
+           color="dodgerblue4", size = 4.5, fontface=2)+
+  annotate(geom = "text", x =1.2, y = 5.1e+06, label = "b",
+           color="dodgerblue4", size = 4.5, fontface=2)+
+  annotate(geom = "text", x =1.81, y = 3.35e+06, label = "a",
+           color="dodgerblue4", size = 4.5, fontface=2)
+
+
+
+```
