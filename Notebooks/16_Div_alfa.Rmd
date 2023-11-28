@@ -1,0 +1,144 @@
+---
+title: "Diversidad alfa"
+output: html_notebook
+---
+
+# Introduccion
+
+Como mencione anteriormente, la diversidad alfa es la diversidad media de especies en u sitio a escala local. Este es el primer nivel de comparacion de diversidad que van a usar para comparar sus muestras
+
+```{r}
+### Librerias ###
+
+library(phyloseq)
+library(ggplot2)
+library(RColorBrewer)
+library(tidyverse)
+library(dplyr)
+library(car)
+
+library(breakaway) #chao-bunge
+
+# Instalacion con BiocManager
+BiocManager::install("microbiome")#uniformidad
+
+library(breakaway)
+library("microbiome")
+## Data
+
+load("Vid_ejemplos.RData")
+
+```
+
+
+# Indices de diversidad alfa
+
+Calcular la diversidad alfa en realidad es bastante sencillo. El reto para ustedes sera interpretar esos datos:
+
+```{r}
+# funcion phyloseq
+
+alphadiv <- estimate_richness(vid_bio, # objeto
+                              split = TRUE, # DEFAULT
+                              measures = NULL) # elegir el tipo de indice el defaltu es null y te da como resultado 7 indices diferentes 
+
+# Separar metadatos
+
+samplemeta <- as.data.frame(vid_bio@sam_data)
+alphadiv <- cbind(samplemeta,alphadiv) # unir metadatos tabla original
+
+```
+
+La funcion base de phyloseq calcula 7 metodos diferentes para diversidad alfa:
+
+1. _Observed:_ cuenta el numero de especies por muestra (riqueza de especies)
+
+2. _Chao1:_ Estimador de riqueza de especie bajo la hipótesis de que las especies raras dan la mayor información sobre aquellas que no se observaron. Chao1 es usado por lo regular para muestras pequeñas y es particularmente útil en datos sesgados a especies de baja abundancia.
+
+3. _ACE:_ Abundance-based coverage estimator (ACE) es otro estimador no parametrico de riqueza de especie que usa la covertura de la muestra, basado en la suma de las probabilidades de las especies observadas
+
+4. _Shannon H':_ es un indice que integra tanto riqueza como uniformidad. Sin entrar en las matematicas Shannon le pone mas enfasis en sus calculos a la riqueza de especies como componente y a la cobertura de especies raras.
+
+5. _Simpson D1:_ Es una medida de diversidad que tiene en cuenta el número de especies presentes, así como la abundancia relativa de cada especie. A medida que aumentan la riqueza y la uniformidad de las especies, también aumenta la diversidad. El valor de D oscila entre 0 y 1. El índice de Simpson pone mayor énfasis en el componente de uniformidad y en los tipos de cobertura dominantes. mas cercano 1 las muestras son mas unifromes(mas diversidad), ms cercano a 0 menos especies 
+
+6. Dado que Simpson mide la probabilidad de que dos individuos seleccionados aleatoriamente de una muestra pertenezcan a la misma especie (o a alguna categoría distinta de especie) tambien se puede calcular _InvSimpson_
+
+7. _Fisher:_ Este es un índice paramétrico de diversidad que supone que la abundancia de especies sigue la distribución de la serie logarítmica.
+
+```{r}
+estimate_richness(vid_bio, split = TRUE,
+                  measures = c("Observed", "Chao1", "Shannon", "Simpson"))
+
+```
+
+## Otros indices de diversidad que pueden calcular
+
+```{r}
+
+# del paquete de breakaway
+chao_bunge(vid_bio, cutoff = 10) # similar a chao1 pero mas sensible, usarlo cuando tenga baja abundancia y gran porcentaje de muestras raras 
+
+# del paquete microbiome para calcular uniformidad
+Evenness <- evenness(vid_bio, index = 'all', # objeto 
+                     zeroes = TRUE, # tipo de indices 
+                     detection =0) # default
+
+# Unir y guardar nuestra tabla
+alphadiv <- cbind(alphadiv,Evenness)
+write.csv(alphadiv, "~/capR/curso/curso_Innovak/Material_clase/Alphadiversity.csv")
+
+```
+
+De esta segunda seccion es importante notar que la funcion de evenness()calculo otros indices de diversidad alfa los cuales estan enfocados en la uniformidad de especies, si notan la mayor parte de los indices antriores le daban mas peso a la riwueza de especies po lo que el paquete microbiome se enfoca en otros tipos de indices, como esta clase no es para explicarle cada uno de ellos de aqui el unico que les puede ser util es el pielou
+
+8. _Pielou:_ equidad (tambien conocida como equidad de Pielou) es la diversidad de shannon dividida por el logritmo del numero de taxones
+presentes
+
+[Mas info en indices de diversidad](https://www.nhm.uio.no/english/research/resources/past/help/diversity.html)
+
+# Graficando diversidad alfa
+
+```{r}
+
+# Graficos usando Phyloseq
+
+graf_alfa <- plot_richness(vid_bio, x = "Tratamiento", # variable indep1
+                         measures=c("Observed", "Shannon", "Simpson", "Chao1"), color="Suelo")+ # variable indep 2
+  scale_color_manual(values = c("aquamarine4", "purple"),# num tipos de suelo
+                     name = "Suelo")+ # nombre variable indep2
+  theme_bw()
+
+graf_alfa$layers <- graf_alfa$layers[-1]
+graf_alfa <- graf_alfa + geom_point(size=4, alpha=0.3)
+graf_alfa
+
+# A mano usando la tabla que creamos
+
+## Pielou
+
+ggplot(alphadiv, # objeto
+       aes(x= Tratamiento,
+           y= pielou, # y seria el indice
+           color= Suelo)) +
+  geom_point(size= 4, alpha= 0.6) +
+  scale_color_manual(values = c("aquamarine4", "purple")) +
+  theme_bw()
+                     
+```
+# Análisis estadistico
+
+Como con los datos que vimos durante ese modulo, el analisis estadistico seguira el mismo flujo de trabajo que vimos y lo deberan elegir depenediendo su num de muestras, tratamietnos, etc
+
+```{r}
+
+# Primero revisamos normalidad
+
+# shapiro test
+for(i in 3:16){ # cambia dependiendo de los datos
+  shapiro <- shapiro.test(alphadiv[,i])
+  normal <- ifelse(shapiro[["p.value"]]>0.05, "YES", "NO")
+  print(c(i, normal))
+}
+
+```
+

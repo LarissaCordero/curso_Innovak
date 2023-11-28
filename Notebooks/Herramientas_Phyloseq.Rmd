@@ -79,9 +79,9 @@ load("VidS83.RData") # siempre empezar con el objeto phyloseq
 ```{r}
 
 #Redes
-net <- make_network(vid_bio, "samples", max.dist = 0.3)
+net <- make_network(vid_bio, "samples", max.dist = 2)
 
-plot_network(net, vid_bio, color = "Tratamiento", shape = "Tipo_suelo", line_weight = 0.3, label=NULL)
+plot_network(net, vid_bio, color = "Tratamiento", shape = "Suelo", line_weight = 0.3, label=NULL)
 
 plot_bar(vid_bio, fill = "Phylum")
 
@@ -139,9 +139,10 @@ Actino_m <- merge_taxa(Actino, taxa_names(Actino)[1:5]) # Por numero
 
 # Uniendo por jerarquia de aglomerar
 
-PS_glom <- tax_glom(PS_filtered, # objeto
+vid_glom <- tax_glom(PS_filtered, # objeto
                     taxrank = "Genus", # nivel de jerarquia 
                     NArm = FALSE) # no quita los valores que son falsos
+
 # uniendo phyloseqs
 
 Merge_p <- merge_phyloseq(Actino, Desulf)
@@ -169,12 +170,50 @@ V2 <- vid_bio
 load("Vid_S85.RData")
 V5 <- vid_bio
 
-vid_bio <- merge_phyloseq(V1, V2, V3, V5)
+vid_bio <- merge_phyloseq(V1, V2, V3, V5) # al usar merge fijarse que los metadatos coincidan 
+
+save(vid_bio, file = "Vid_ejemplos.RData")
+
+# Modificando la tabla de metadatos
+
+vid_bio@sam_data$Suelo[is.na(vid_bio@sam_data$Suelo)] <- "Salino"
+vid_bio@sam_data$Tratamiento[vid_bio@sam_data$Tratamiento == "Sin bioestimulante"] <- "Control"
+vid_bio@sam_data <- vid_bio@sam_data[,1:2] # [filas, columnas]
+
+save(vid_bio, file = "Vid_ejemplos.RData")
+
+```
+
+
+### Abundancia relativa
+
+DADA2 nos da abundancias absolutas, las cuales pasamos a nuestro objeto de Phyloseq. la absoluta es el numero total de las especies o individuos dentro de cada especie (Conteo)
+
+La abundancia relativa en cambio normaliza nuestras muestras para poder compararlas entre si.Para ello usa proporciones siendo 1 el 100% de nuestro conteo por muestras. De esta manera podemos comparar la composicion de nuestras muestras aunque no tengamos valores totales o absolutos iguales.
+
+Para transformar de abundancia absoluta a relativa o cualquier otro tipo de calculo para nuestras muestras se usa la siguiente funcion en phyloseq:
+
+```{r}
+Psoil_real <- transform_sample_counts(PS_filtered, # objeto a transformar
+                                      function(x) x / sum(x)) # x es mi conteo
+
+```
+
+# Reexploramos graficos
+
+```{r}
+#1. Grafico de barras
+
+Top_phyla <- tax_glom(Psoil_real,taxrank = "Phylum", NArm = FALSE)
+
+Top_phlya <- prune_taxa(names(sort(taxa_sums(Top_phyla),TRUE)[1:5]),
+                        Top_phyla)
+
+plot_bar(Top_phyla, fill = "Phylum")
+plot_heatmap(Top_phlya, taxa.label = "Phylum")
 
 ```
 
 
 
-
-## Abundancia relativa
 
