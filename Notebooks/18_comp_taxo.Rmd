@@ -1,0 +1,214 @@
+---
+title: "Analisis de composicion taxonomica "
+output: html_notebook
+---
+
+# Introduccion
+
+Hasta este momento hemos estado contando CUANTO hay dentro de nuestras muestras pero lo verdaderamente util es saber QUE hay dentro de las muestras. Esto es a lo que se le llama _analisis taxonomico._
+
+__Porque es importante?__
+
+Como les comentaba las comunidades microbianas en suelos son muy dinamicas y muchas veces (como con mis datos) no ves cambios en las cantidades totales de microorganismos. Sin embargo, al ver la taxonomia las abundancias relativas de algunos grupos pueden ser modificados ya sea aumentado o disminuido. 
+
+De esta manera se espera que cualquier producto o tratamiento que apliquemos al suelo, no tenga un efecto detrimental en grupos taxonomicos que son buenos para la planta. Dado que todas estos hongos y microbios interactuan constantemente en este microecosistema estos cambios en abundancia pueden darnos pista de como interactuan.
+
+
+```{r}
+### librerias
+
+library(phyloseq)
+library(tidyverse)
+library(dplyr)
+library(RColorBrewer)
+library(pheatmap)
+library(microbiome)
+library(ggsignif)
+library(scales)
+library(car)
+library(wesanderson)
+
+# Data
+
+load("Vid_ejemplos.RData")
+
+
+```
+
+Este analisis realmente no tiene un proceso en especifico y en realidad es exploratorio, para ello necesaitamos visualizar nuestros datos osea hacer muchos graficos y de ahi se elihe a cuales grupos vale la pena hacer analisis taxonomico
+
+Yo les voy a enseñar el proceso que yo uso pero no es un set de pasos ya definido y realmente este proceso se adaptara a sus datos, En este caso yo voy a usar mis datos de hongos pero udstedes usaran los datos de vid y vamos a ver hacia donde nos lleva el proceso e iremos adaptando el codigo
+
+# 1. Visualizar a nivel de phylum 
+
+## Heatmap
+
+```{r}
+Phyla_fum <- tax_glom(vid_bio, taxrank = "Phylum", NArm = FALSE)
+
+# Extraer datos del objeto de phyloseq
+
+OTU_matrix <- as.data.frame(Phyla_fum@otu_table)
+Tax_matrix <- as.data.frame(Phyla_fum@tax_table)
+
+## Renombrar columnas de nuestras abundancias con el phylum de la tabla taxa
+
+colnames(OTU_matrix) <- Tax_matrix$Phylum
+
+# quitar phylums desconocidos
+OTU_matrix <- OTU_matrix[,-c(10,21)] # correr el codigo en caso de que aparezcan phylum con NA
+
+Phyla_matrix <- as.matrix(t(OTU_matrix))
+
+```
+
+### Procesamiento de datos
+
+Este proceso siempre sera especifico a sus datos, usualmente los heatmaps siempre van de mayor a menor asi que en este paso siempre lo haran pero resto fue ordenar muestras y renombrar variables
+
+```{r}
+Phyla_matrix <- Phyla_matrix[order(Phyla_matrix[,1],
+                                   decreasing = TRUE),] # ordenar de mayor a menor
+
+
+# Cambiar el orden de las muestras
+
+sorder <- c("S81", "S85", "S82", "S83")
+  
+Phyla_matrix <- Phyla_matrix[, sorder]
+
+# cambiar nombre de la que este muy largo o lo que no queremos que salga en los nombres
+
+row.names(Phyla_matrix)[16] <- "SAR324 clade"
+
+```
+
+### Usando el paquete pheatmap
+
+Este paquete es el que (En mi opinion) tiene la mejor flexibilidad al momento de hacer heatmaps. RStudio ofrece muchos otros pero tristemente ggplot2 n o tiene una funcion predeterminada facil para hacer heatmaps bonitos por lo que yo me decidi a usar este . Sin embargo, como con muchos tipos de graficos veran que la funcion base no ayuda mucho y poco a poco les dare tips para hacer que sus graficos sean bonitos y legibles
+
+```{r}
+
+pheatmap(Phyla_matrix) # el objeto siempre debe de estar en formato de matriz y los valores como numericos
+
+
+
+```
+
+### _Notan algo en el orden de nuestras filas y columnas? Clusters_
+La funcion default de pheatmap es que automaticamente te reacomoda (cluster) tus filas y columnas de acuerdo a como cree que estan mas relacionadas las variables; es decir las agrupa. Esta funcion suele ser util cuando haces heatmaps de genes ya que te permite ver como se activan o apagan en conjunto y si hay "clusters" de genes relacionados. Pero en nuestro caso arruino todo el pre-procesamiento previo que nosotros le dimos por lo que tenemos que quitarle ese default.
+
+```{r}
+pheatmap(Phyla_matrix,
+         cluster_rows = FALSE, cluster_cols = FALSE) # quitar cluster
+
+```
+### _El siguiente problema? La escala_
+
+Si se fijan los colores en este heatmap son cero utiles. Solo tenemos cambios graduales en una columna y el resto se ven todas horribles. Esto ocurre porque nuestros datos tienen muchas variaciones entre ellos, se puede arreglar de varias maneras y la funcion de pheatmap tiene el argumento de scale para tratar de solucionarlo. El default siempre es _none_ pero vamos tambien puede modificarlo por filas y columnas:
+
+```{r}
+pheatmap(Phyla_matrix,
+         cluster_rows = FALSE, cluster_cols = FALSE,
+         scale = "none") # default
+
+pheatmap(Phyla_matrix,
+         cluster_rows = FALSE, cluster_cols = FALSE,
+         scale = "column") # transforma los valores usando la escala de las muestras
+# casi no lo van a usar
+
+pheatmap(Phyla_matrix,
+         cluster_rows = FALSE, cluster_cols = FALSE,
+         scale = "row") # transforma los valores usando la escala de phylums
+ 
+
+
+```
+
+Cual creen que es mas util?
+
+Desafortunadamente ninguno de ellos es muy util. El de columnas no hizo nada porque el problema recae en que tenemos phylums con muuucha abundancia y otros que casi estan llenos de ceros mientras; pero eso pasa en todas las muestras por lo que al tratar de escalarlo se ve asi. 
+
+En el caso de la transformacion por filas nos va un poco mejor porque trata de normalizar las abundancias de todos los phylums a una escala. Sin embargo, por el mismo problema anterior lo unico que nos resalta es si alguna de las muestras tiene numeros extranamente altos o bajos DENTRO de ese mismo phylum. Es decir nos compara dentro de phylums pero no entre ellos. Asi que les voy a compartir el codigo que me tomo literalmente 1 semana encontrar y basicamente salvo mi tesis.
+
+### _Como modificar la escala manualmente ? breaks_
+
+```{r}
+
+## Funcion especificamente para separa nuestros datos en secciones
+
+quantile_breaks <- function(xs, n = 10) {
+  breaks <- quantile(xs, probs = seq(0,1, length.out = n))
+  breaks[!duplicated(breaks)]
+} # recuerden ue la funcion nunca se cambia de nombre ( o sea copien y peguen siempre entee documentos)
+
+mat_breaks <- quantile_breaks(Phyla_matrix, # la matriz
+                              n = 10) # el default es 10 pero se puede poner el numero de cortes que quiero a mis datos 
+  
+# volvemos al codigo de heatmap 
+pheatmap(Phyla_matrix,
+         cluster_rows = FALSE, cluster_cols = FALSE,
+         scale = "none", # regresamos a que no nos salga escala
+         breaks = mat_breaks) # aquí ponemos el objeto con cortes que creamos
+
+
+```
+### porque no se ve bien los colores?
+
+Auqnue ya puedan ver una mejora en nuestra escala el problema ahora es que la funcion no tiene la cantidad adecuada de colores para representar nuestros datos. Por ello nosotros le vamos a dar otros colores:
+
+```{r}
+pheatmap(Phyla_matrix,
+         cluster_rows = FALSE, cluster_cols = FALSE,
+         scale = "none", #regresemos a que no nos ponga escala
+         breaks = mat_breaks,
+         color = colorRampPalette(c("beige", "aquamarine3","indianred1", "darkolivegreen"))(9))
+
+
+```
+
+# ejercicio
+
+cada quien va a poner el numero de breaks para que cvean como cambia el grafico 
+
+```{r}
+
+mat_breaks <- quantile_breaks(Phyla_matrix, # la matriz
+                              n = 20) # el default es 10 pero se puede poner el numero de cortes que quiero a mis datos 
+  
+
+pheatmap(Phyla_matrix,
+         cluster_rows = FALSE, cluster_cols = FALSE,
+         scale = "none", #regresemos a que no nos ponga escala
+         breaks = mat_breaks,
+         color = colorRampPalette(c("seashell", "steelblue2","orchid4", "darkblue"))(17))
+
+#  usando otros colores
+
+pheatmap(Phyla_matrix,
+         cluster_rows = FALSE, cluster_cols = FALSE,
+         scale = "none", #regresemos a que no nos ponga escala
+         breaks = mat_breaks,
+         color = colorRampPalette(c("snow2","lightskyblue1","plum3","magenta4","steelblue4","black"))(17))
+
+# usando mas breaks no hubo mucha diferencia en la grafica con 20 quedo bien 
+
+```
+
+# ultimos elementos del formato
+
+```{r}
+# a partir de aqui va ser diferente para cada heatmap
+
+pheatmap(Phyla_matrix,
+         cluster_rows = FALSE, cluster_cols = FALSE,
+         scale = "none", #regresemos a que no nos ponga escala
+         breaks = mat_breaks,
+         color = colorRampPalette(c("seashell", "steelblue2","orchid4", "darkblue"))(17), # misma funcion pero cambio en el num de colores
+         fontsize = 10, #tamaño de letra
+         gaps_col = c(2), # separaciones entre columnas
+         labels_col = c("Balox salino", "Balox no salino","Control salino", "Control no salino"))
+
+```
+
+
