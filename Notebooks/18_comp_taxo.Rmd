@@ -31,6 +31,7 @@ library(wesanderson)
 # Data
 
 load("Vid_ejemplos.RData")
+load("ITS_filt.RData")
 
 
 ```
@@ -58,7 +59,7 @@ colnames(OTU_matrix) <- Tax_matrix$Phylum
 # quitar phylums desconocidos
 OTU_matrix <- OTU_matrix[,-c(10,21)] # correr el codigo en caso de que aparezcan phylum con NA
 
-Phyla_matrix <- as.matrix(t(OTU_matrix))
+Phyla_matrix <- as.matrix(t(OTU_matrix)) # se hizo cambio de filas y columnas por que es checar que los phylum siempre queden en las filas 
 
 ```
 
@@ -210,5 +211,510 @@ pheatmap(Phyla_matrix,
          labels_col = c("Balox salino", "Balox no salino","Control salino", "Control no salino"))
 
 ```
+Otros posibles cambios que le podemos hacer a nuestro heatmap
 
+*border_color: colores de celdas
+
+*cellwidth / cellheight: ancho de celda en puntos; si no se pone los valores depende del tamaño de la ventana
+
+*clustering_distance_rows o columns: la distancia para clusterizar
+
+*clustering_method: metodos en hclust
+
+*cutree_rows / cols: numero de clusters en el que los datos se van a dividir
+
+*treeheight_row/col: altura de los arboles de clusters default en 50 puntos
+
+*legend: true or false
+
+*legend_breaks: vectpr con los cortes de la leyenda
+
+*legend_labels: vector con los nombres de los cortes para la leyenda
+
+*annotation_row / col: filas de colores extra para demostrar los metadatos en el heatmap
+
+*annotation_colors : colores manuales de anotaciones 
+
+*annotation_legend : true or false
+
+*annotation_names_row/ col: true or false se veran lo nombres de las anotaciones o no 
+
+*show_rownames/colnames :true or false
+
+*main: titulo de grafico 
+
+*fontsize_row/ col : cambiar el tamaño de letra por separado 
+
+*angle_col :angulo del texto , solo se pueden elegir de estas opciones (0, 45, 90, 270 and 315)
+
+*display_numbers : true or false, poner los valores de las celdas
+
+*number_format / color
+
+*fontsize_number
+
+*gaps_row/col: vector de donde poner los espacios en el heatmap
+
+*filename: camino para guardar el heatmap como imagen
+
+*width/ height: en pulgadas
+
+*na_col : especificar el color de las celdas sin valor
+
+### mini ejercicio:
+
+Agreguenle o modifiquen 2 o mas de estos argumenos en su grafico 
+
+```{r}
+
+pheatmap(Phyla_matrix,
+         cluster_rows = FALSE, cluster_cols = FALSE,
+         scale = "none", #regresemos a que no nos ponga escala
+         breaks = mat_breaks,
+         color = colorRampPalette(c("seashell", "steelblue2","orchid4", "darkblue"))(17), # misma funcion pero cambio en el num de colores
+         fontsize = 10, #tamaño de letra
+         gaps_col = c(2), # separaciones entre columnas
+         labels_col = c("Balox salino", "Balox no salino","Control salino", "Control no salino"),
+         angle_col = 0,
+         fontsize_col = 9.5,
+         fontsize_row = 9,
+         main = "Taxonomía en muestras vid")
+
+
+
+
+```
+
+### Ejercicio final
+
+Usando global patterns creen un heatmap de los phylums encontrados
+
+```{r}
+
+data("GlobalPatterns")
+
+Phyla_fum <- tax_glom(GlobalPatterns, taxrank = "Phylum", NArm = FALSE)
+
+# Extraer datos del objeto
+
+OTU_matrix <- as.data.frame(Phyla_fum@otu_table)
+Tax_matrix <- as.data.frame(Phyla_fum@tax_table)
+
+## Renombrar columnas de nuestras abundancias con el phylum de la tabla taxa
+
+Tax_matrix[54,2] <- "Unknown"
+row.names(OTU_matrix) <- Tax_matrix$Phylum
+
+Phyla_matrix <- OTU_matrix[order(OTU_matrix[,1],
+                                   decreasing = TRUE),] 
+
+Phyla_matrix <- as.matrix(Phyla_matrix) # cambiar a funcion ya que siempre los datos tienen que ser numericos o sea estar en una matriz
+
+class(Phyla_matrix) <- "numeric"
+
+quantile_breaks <- function(xs, n = 10) {
+  breaks <- quantile(xs, probs = seq(0,1, length.out = n))
+  breaks[!duplicated(breaks)]
+} # recuerden ue la funcion nunca se cambia de nombre ( o sea copien y peguen siempre entee documentos)
+
+Phyla_matrix <- Phyla_matrix[-38,]
+
+mat_breaks <- quantile_breaks(Phyla_matrix, # la matriz
+                              n = 20) # el default es 10 pero se puede poner el numero de cortes que quiero a mis datos 
+  
+
+pheatmap(Phyla_matrix,
+         cluster_rows = FALSE, cluster_cols = FALSE,
+         scale = "none", #regresemos a que no nos ponga escala
+         breaks = mat_breaks,
+         color = colorRampPalette(c("seashell", "steelblue2","orchid4", "darkblue", "gray10"))(12),
+         fontsize_col = 9.5,
+         fontsize_row = 6)
+         
+
+
+
+
+
+```
+
+## Grafico de barras
+
+Se acurdan que al ver las funciones que nos daba phyloseq vimos como hacer graficos de barras? pues bueno vaos aprender a hacerlos bonitos}
+
+### Pre procesamiento de datos
+
+```{r}
+
+# Recuerden que este tipo de graficos siempre se hacen con abundancias relativas
+
+Psoil_rel <- transform_sample_counts(vid_bio, # objeto a transformar
+                                     function(x) x / sum(x))
+ # x es mi conteo
+
+# otra vez juntamos phylums
+
+Top_phyla <- tax_glom(Psoil_rel, taxrank = "Phylum", NArm = FALSE)
+
+
+# seleccionar solo los valores top
+
+Top_phyla <- prune_taxa(names(sort(taxa_sums(Top_phyla),TRUE)[1:10]),
+                        Top_phyla) # con bacterias top 10 y con hongos top 5
+
+```
+
+## El grafico
+
+Usando la función plot_composition- del paquete micriobiome
+
+```{r}
+## Grafico base
+order <- c("S81", "S85", "S82", "S83")
+
+plot_composition(Top_phyla, # objeto en valores relativos
+                 plot.type = "barplot") 
+
+#Ahora mas bonito 
+
+plot_composition(Top_phyla, # objeto en valores relativos
+                 plot.type = "barplot")+
+  theme_bw()+
+  scale_fill_brewer(palette = "Paired", name = "Phylum",
+                    labels = c ("Actinobacteriota", "Chlorofelxi", "Proteobacteria", "Acidobacteriota", "Verrucomicrobiota", "Bacteroidota", "Cyanobacteria", "Patescibacteria", "Planctomycetota", "Firmicutes"))+
+  guides(x =guide_axis(angle = 90))+
+  scale_x_discrete( labels = c("Balox no salino", "Control no salino", "Control salino", "Balox salino"))
+                    
+
+```
+
+Si bien este grafico ya esta bien, pero ahora vamos agregar porcentajes
+
+```{r}
+
+plot_composition(Top_phyla, # objeto en valores relativos
+                 plot.type = "barplot")+
+  theme_bw()+
+  scale_fill_brewer(palette = "Set2", name = "Phylum",
+                    labels = c ("Actinobacteriota", "Chlorofelxi", "Proteobacteria", "Acidobacteriota", "Verrucomicrobiota", "Bacteroidota", "Cyanobacteria", "Patescibacteria", "Planctomycetota", "Firmicutes"))+
+  guides(x =guide_axis(angle = 90))+
+  scale_x_discrete( labels = c("Balox no salino", "Control no salino", "Control salino", "Balox salino"))+
+  scale_y_continuous(breaks = pretty_breaks(n = 10), # numero de separaciones
+                     labels = scales::percent) # representadas en %
+
+```
+
+Usando estos dos graficos que pueden concluir?
+
+Phykum de revisar a detalle:
+EN abundancia hay mas protobacteriota, seguido de actinobacteria
+
+Por diferencias en tratamientos cyanobacterias ya que en los controles sale mas que con el balox
+
+Si bien ya les ensene a presentar graficos bonitos y definitivamente cualquiera de estos graficos podrian incluirlo en un reporte, la visualizacion tambien nos permite darnos cuenta si existen ciertos patrones en abundancia. De esta manera podemos seleccionar alguno de estos grupos y verlos en la lupa de una manera mas minuciosa.
+
+Por ejemplo, yo de mis datos podria decir que dada la dominancia que tiene Ascomycota tal vez vale la pena revisarla minuciosamente. Sin embargo, el heatmap no nos mostro si habian diferencias entre plantas o tratamientos (porque tal vez no las hay?) por lo que hacer varios loops de analisis estadistico seria muy util para elegirlos
+
+# Analizar estadisticamente a nivel de phylum
+
+El ejemplo va ser con ANOVA y por eso estamos usando los datos de ITS
+
+Para los graficos ya habiamos extraido nuestras tablas de conteos y taxa, pero ahora tambien necesitamos nuestros metadatos:
+
+```{r}
+
+# Extract metadata
+
+Phyla_fum <- tax_glom(ITS_filtered, taxrank = "Phylum", NArm = FALSE)
+
+# Extraer datos del objeto de phyloseq
+
+OTU_matrix <- as.data.frame(Phyla_fum@otu_table)
+Tax_matrix <- as.data.frame(Phyla_fum@tax_table)
+
+## Extraer metadata
+metadata <- as.data.frame(Phyla_fum@sam_data)
+
+
+## Renombraremos las columnas de nuestras abundancias con el phylum de la tabla de taxa
+
+colnames(OTU_matrix) <- Tax_matrix$Phylum
+Fungi_phyla <- cbind(metadata,OTU_matrix)
+
+
+```
+
+# Normalizacion
+
+```{r}
+
+## Shapiro test
+
+for(i in 5:ncol(Fungi_phyla)){
+  shapiro <- shapiro.test(Fungi_phyla[,i])
+  normal <- ifelse(shapiro[["p.value"]]>0.05, "YES", "NO")
+  print(c(i, normal))
+}
+
+# solo ascomycota Y Olpidiomicota normal
+
+## Normalizar phylums ##
+
+## transformacion Log
+
+Norm_fungi <- Fungi_phyla
+
+for(i in 6:ncol(Norm_fungi)){
+  Norm_fungi[,i] <- abs(log10(Norm_fungi[,i]+1)) # abs es valor abosluto
+}
+
+# volvemos a correr shapiro con lo normalizado 
+
+for(i in 5:ncol(Norm_fungi)){
+  shapiro <- shapiro.test(Norm_fungi[,i])
+  normal <- ifelse(shapiro[["p.value"]]>0.05, "YES", "NO")
+  print(c(i, normal))
+}
+
+# checamos grupos especificos
+
+shapiro.test(Norm_fungi$p__Mucoromycota) #6
+shapiro.test(Norm_fungi$p__Basidiobolomycota) #7
+
+hist(Norm_fungi$p__Mucoromycota) #6
+hist(Norm_fungi$p__Basidiobolomycota) #7
+
+# concluimos que casi todos nuestros phylums son normales
+
+# tabla final (Solo para estos datos)
+
+Norm_fungi <- Norm_fungi[,-c(5,13,15,18,19,20)] # quitando columnas
+
+
+# 5 y 13 eran normales
+
+# el resto los quitamos por baja abundancia
+
+# Unir tablas
+
+Fungi_stats <- cbind(Fungi_phyla[,1:13],Norm_fungi[,5:14])
+Fungi_stats <- Fungi_stats[,-c(6:12)] #quitamos repeditas que estaba entre la 5 y la 13
+ 
+# otra manera de unir las tablas en un solo paso 
+
+Fungi_stats <- cbind(Fungi_phyla[,c(1:5,13)], Norm_fungi[,5:14]) # seleccionamos las normales de fungi phyla y unimos con las normalizadas
+
+
+```
+
+## Anova de dos vias
+
+```{r}
+# Homogeneidad de varianza
+
+## Levene test 
+
+for(i in 5:ncol(Fungi_stats)){
+  Lev_ex <- leveneTest(Fungi_stats[,i] ~ Plant_Type * Treatment,
+                       data = Fungi_stats)
+  levene <- ifelse(Lev_ex[["Pr(>F)"]]>0.05, "YES", "NO")
+  print(c(i,levene))
+}
+
+
+# todos pasan levene
+
+## for loop de anova ##
+
+# Paso 1: Tabla vacia (siempre especifica para sus datos)
+
+phyla_pvalues <- data.frame(Plant = rep(NA,12),
+                            Treatment = rep(NA,12),
+                            Pl_Trt = rep(NA,12)) # el numero de variables , 3 columnas para un anova de 2 vias 
+
+for(i in 5:ncol(Fungi_stats)){
+  Phyla <- Fungi_stats[,i] #objeto de columna porque anova no lee la columna
+  AR <- Anova(aov(Phyla ~ Plant_Type * Treatment, # tratameintos
+                  data = Fungi_stats)) # codigo de anova en un objeto
+  j <- i-4 # para que me empiece a llenar desde la fila 1, formula general es i-x=1
+  phyla_pvalues$Plant[j] <- AR$`Pr(>F)`[1]
+  phyla_pvalues$Treatment[j] <- AR$`Pr(>F)`[2]
+  phyla_pvalues$Pl_Trt[j] <- AR$`Pr(>F)`[3]
+}
+# Elementos a cambiar para adaptar este for loop
+# 1. Fungi_stats por su tabla de datos
+# 2. 5 el numero despues de sus metadatos 
+# 3. Dentro de la Anova los tratamientos
+# 4. j formula general i-x=1 cambiar el valor de x que en este caso es # 5. nombre de phyla_pvalues dependera de sus datos y variables
+
+
+row.names(phyla_pvalues) <- colnames(Fungi_stats[5:16]) # agregar los nombres de las columnas
+
+# Pueden guardar esta tabla
+
+write.csv(phyla_pvalues, "~/capR/curso/curso_Innovak/Material_clase/Phyla_pvalues.csv")
+
+```
+
+Basados en estos resultados nosotros podemos elefgir cual de estos phylums se puede ver en a un nivel taxonomico mas bajo. Aisimismo no tenemos que sacar tukey para todos solo para los significativos
+
+```{r}
+## Mucoromycota, Chytridiomycota y Zoopagomycota
+
+TukeyHSD(aov(p__Zoopagomycota~ Plant_Type * Treatment,
+             data= Fungi_stats)) # sirve para ver que grupo es diferente en plant_Type
+
+TukeyHSD(aov(p__Mucoromycota~ Plant_Type * Treatment,
+             data= Fungi_stats))
+
+
+```
+El siguiente paso seria graficar alguna de estas relaciones interesantes de lo anterior
+
+## Ejercicio
+
+Este ejercicio lo haremos juntos Si bien podria haberles dado el codigo, quise que vieramos juntos esta vez como se podria adaptar a un codigo que ya sabemos ( en este caso el for loop ANOVA) a un caso que no sabemos (T test). Si recuerdan los datos de vid no podemos analizarlos por anova porque solo tenemos una variable de cada "grupo", sin embargo al hacer diversidad alfa vimos que si juntamos los datos podemos hacer t test. En este caso tenemos muchos datos ( mas que solo los 7 indices de diversidad alfa) por lo que hacerlo uno porf uno seria una tarea ridifcula asi que vamos a hacer el analisis usando un for loop
+
+```{r}
+Phyla_fum <- tax_glom(vid_bio, taxrank = "Phylum", NArm = FALSE)
+
+# Extraer datos del objeto de phyloseq
+
+OTU_matrix <- as.data.frame(Phyla_fum@otu_table)
+Tax_matrix <- as.data.frame(Phyla_fum@tax_table)
+
+## extraer metadata
+
+metadata <- as.data.frame(Phyla_fum@sam_data)
+
+## Renombrar columnas de nuestras abundancias con el phylum de la tabla taxa
+
+colnames(OTU_matrix) <- Tax_matrix$Phylum
+
+# quitar phylums desconocidos
+OTU_matrix <- OTU_matrix[,-c(10,21)] # correr el codigo en caso de que aparezcan phylum con NA
+
+vid_phyla <- cbind(metadata, OTU_matrix)
+
+## Checamos normalidad ##
+
+## Shapiro test
+
+for(i in 3:ncol(vid_phyla)){
+  shapiro <- shapiro.test(vid_phyla[,i])
+  normal <- ifelse(shapiro[["p.value"]]>0.05, "YES", "NO")
+  print(c(i, normal))
+}
+
+# 10 15 24:28 30:34 37:40
+# vamos a quitar 10, 15, 27 38:40 por baja abundancia
+
+## Normalizar phylums ##
+
+Norm_vid <- vid_phyla[,c(24:26, 28, 30:34, 37)]
+
+## transformacion Log
+
+
+for(i in 1:ncol(Norm_vid)){
+  Norm_vid[,i] <- abs(log10(Norm_vid[,i]+1)) # abs es valor abosluto
+}
+
+# volvemos a correr shapiro con lo normalizado 
+
+for(i in 1:ncol(Norm_vid)){
+  shapiro <- shapiro.test(Norm_vid[,i])
+  normal <- ifelse(shapiro[["p.value"]]>0.05, "YES", "NO")
+  print(c(i, normal))
+}
+
+# juntar tablas
+
+vid_stats <- cbind(vid_phyla[,-c(10,15,24:28,30:34,37:40)], Norm_vid)
+
+# contando las que eliminamos tendriamos que tener 34 variables
+
+### For loop T test
+
+# Paso 1. Tabla vacia
+
+phyla_pvalues <- data.frame(Tratamiento = rep(NA,32),
+                            Suelo = rep(NA,32)) # contar el num de variables
+
+# Paso 1.5: 
+                            
+objeto_T <- t.test(Proteobacteria ~ Tratamiento, data = vid_stats)
+# de aqui vimos como llamar al p value
+# objeto_T[["p.value"]]
+
+# ver si se puede meter valores por columnas
+t.test(vid_stats[,3] ~ Tratamiento, data = vid_stats)
+
+# paso 2: for loop
+
+for(i in 3:ncol(vid_stats)){
+  T_trat <- t.test(vid_stats[,i] ~ Tratamiento, data = vid_stats)
+  S_trat <- t.test(vid_stats[,i] ~ Suelo, data = vid_stats)
+  j <- i-2
+  phyla_pvalues$Tratamiento[j] <- T_trat[["p.value"]]
+  phyla_pvalues$Suelo[j] <- S_trat[["p.value"]]
+}
+
+# Nombrar las columnas
+row.names(phyla_pvalues) <- colnames(vid_stats[3:34]) 
+
+# Pueden guardar esta tabla
+
+write.csv(phyla_pvalues, "~/capR/curso/curso_Innovak/Material_clase/Phyla_pvalues_vid.csv")
+
+
+```
+
+# Conclusion de analisis a nivel phylum 
+
+Despues de todos estos graficos y analisis estadisticos ustedes debrian tener unos 5 phylums tops que quieran analizar mas a profundidad en el caso de isa fue enfocar en Ascomycota y Mycoromycota
+
+En el caso de vid : 
+*Cyanobacteria(hubo un cambio en el tratamiento), Proteobacteria (primero mas abundante) basados en graficos 
+
+*basados en estadistica: Chloroflexi y Actinobacteria
+
+```{r}
+
+# crear un subset con los phylums que elejimos
+
+Cyan <- subset_taxa(vid_bio, Phylum == "Cyanobacteria")
+
+Chlo <- subset_taxa(vid_bio, Phylum == "Chloroflexi")
+
+```
+
+# 2. visualizar a nivel de orden
+
+Si bien despues de phylum viene clase, por razones de tiempo ( tanto de la clase como de su trabajo)les recomiedno que el siguiente nivel a analizar sea orden:
+
+```{r}
+Cyan_or <- tax_glom(Cyan, taxrank = "Order", NArm = FALSE) # JUNTAR ORDEN
+
+Chlo_or <- tax_glom(Chlo, taxrank = "Order", NArm = FALSE)
+
+
+```
+
+En este caso no lo hice para Mucoromycota tambien porque si se fijan solo tiene un orden. Aglomerar todos nuestros datos por orden no nos serviria de nada por lo que les vuelvo a reiterar que aqui depende de cada caso para que sigan su flujo de analisis. A partir de aqui yo tendria 2 opciones: 
+
+1. Si se fijan a nivel de familias si habian varias clasificaciones por lo que podria analizar a ese nivel en vez de a nivel de orden o
+
+2. Pasarme directamente al siguiente nivel de analisis: el genero
+
+Nuevamente al ver los datos (sin graficar) me doy cuenta que las familias y los generos siguen los mismos patrones por lo que en vez de analizar 2 veces dejaremos Mucoromycota para el siguiente nivel.
+
+### Heatmap o barplot?
+
+Primero vamos a ver el barplot default sin arreglar nada en los datos:
+
+```{r}
+plot_composition(Chlo_or,plot.type = "barplot")
+# UW , WZPA
+```
 
