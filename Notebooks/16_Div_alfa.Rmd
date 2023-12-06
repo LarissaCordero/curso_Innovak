@@ -245,7 +245,7 @@ for(i in 15:23){ # cambia dependiendo de los datos
 # histogramas si es que no eran normales
 
 hist(alphadiv$Shannon) # raiz cuadrada anova para normalizar 
-hist(alphadiv$Chao1) # 
+hist(alphadiv$Chao1) # no parametrico
 
 # normalizar
 
@@ -265,8 +265,8 @@ Anova(ad_anova)
 
 ad_Tukey <- TukeyHSD(ad_anova)
 
-
 ```
+
 
 
 
