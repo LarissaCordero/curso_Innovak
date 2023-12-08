@@ -1,0 +1,235 @@
+---
+title: "Analisis funcional para hongos"
+output: html_notebook
+---
+
+# introduccion
+
+Desafortunadamente, metagenassist solo funcion paras las asignacion funcional de fenotipos en bacterias por lo que para hongos usaremos la base de datos FungalTraits que es una base de datos de rasgos de hongos acoplada para ser usada en RStudio. La base fue creada combianando informacion de bases previas conocidad como FUNGuild y fUN LAS CUALES USAN informacion de unite respecto a caracterisiticas fenotipicas de cientos de secuencias de hongos a nivel de genero y especie
+
+```{r}
+
+#Instalar paquete
+devtools::install_github("ropenscilabs/datastorr") #primero se corre este
+devtools::install_github("traitecoevo/fungaltraits")
+# nota htmltools solo se puede actualizar si todos los Rmarkdowns estan cerrados
+
+# librerias
+
+library(fungaltraits) # the database
+library(phyloseq)
+library(tidyverse)
+library(dplyr)
+fungal_traits()
+library(pheatmap)
+library(scales)
+library(microeco)
+library(ggsignif)
+```
+```{r}
+
+load("ITS_filt.RData")
+
+ITS_genus <- subset_taxa(ITS_filtered, !is.na(Genus))
+
+# Extraer tax table
+
+Fun_genus <- as.data.frame(ITS_genus@tax_table)
+write.csv(Fun_genus, "~/capR/curso/curso_Innovak/Material_clase/Fungal_genus.csv") # en excel vamos a quitar lo de g__ y s__ para que los datos puedan ser unidos
+# se quita con reemplazar y filtrar
+
+## Subir tabla corregida
+
+Fun_genus <- read.csv("~/capR/curso/curso_Innovak/Material_clase/Fungal_genus.csv")
+row.names(Fun_genus) <- Fun_genus[,1]
+Fun_genus <- Fun_genus[,-1]
+
+# Crear objetos con las tablas de datos 
+
+fungal_traits <- fungal_traits() # original
+FT <- fungi_func_FungalTraits # de datos suplementarios usando libreria microeco
+FUNGuild <- fungi_func_FUNGuild # comparar con base de datos antiguas
+
+```
+
+# Asignacion de grupos funcionales 
+
+en este caso el proeso de asignacion va ser manual usando el codigo de R merge(), para ello se usa una variable comin entre dos tablas y la mas especifica es genero:
+
+```{r}
+
+# renombrar columnas Genus
+colnames(FT)[6] = "Genus"
+
+## merge 
+Fun_fun <- merge(x = Fun_genus, y = FT, by = "Genus") # une las dos tablas
+
+## limpiar tablas
+
+Fun_fun <- Fun_fun[,-(3:7)]
+Fun_fun <- Fun_fun[,-(4:9)]
+Fun_fun <- Fun_fun[,-6]
+
+
+#remover columnas vacias
+empty_columns <- sapply(Fun_fun, function(x) all(is.na(x) | x == ""))
+
+Fun_fun <- Fun_fun[,-(18:19)]
+
+# Guardar tabla
+write.csv(Fun_fun, "~/capR/curso/curso_Innovak/Material_clase/Fungi_funct.csv")
+
+
+```
+
+En esta tabla unimos la identificacion taxonomica con la categoria fenotipica de guild que se traduce como nicho, es decir el rop que potencialmente podrian cumplir en el ecosistema, el siguiente paso es unir estos datos con la tabla de abundancia para ver cuantos hongos cumple cada rol;
+
+```{r}
+
+Fun_counts <- as.data.frame(ITS_genus@otu_table) # extraer de phyloseq
+
+Fun_counts <- Fun_counts[,Fun_fun[,2]] # filtrar estilos de vida identificados
+
+## unir el estilo de vida y secundario a la tabla de cuentas
+
+Fun_counts[nrow(Fun_counts) + 1,] <- Fun_fun[,9] # primary
+Fun_counts[nrow(Fun_counts) + 1,] <- Fun_fun[,5] # secondary
+
+# GUardar tabla
+
+write.csv(Fun_counts, "~/capR/curso/curso_Innovak/Material_clase/Fungi_lifestyles.csv")
+
+```
+
+Esta tabla final la modifique en excel pata unir las cuentas de cada grupo. Esto tambien se puede hacer en R usando funciones de dplyr
+
+```{r}
+Fun_counts %>%
+  mutate(soilsapro_sum = colSums(1:20))# no corre
+
+
+
+
+```
+## Preprocesamiento de datos
+
+```{r}
+Sim_fungi <- read.csv("~/capR/curso/curso_Innovak/Material_clase/Simplified_Fungi.csv")
+
+row.names(Sim_fungi) <- Sim_fungi[,1]
+Sim_fungi <- Sim_fungi[,-1]
+
+# siempre cambiar a matriz
+
+Sim_fungi <- data.matrix(Sim_fungi)
+
+Sim_fungi <- Sim_fungi[order(Sim_fungi[,1], decreasing = TRUE),]
+
+sorder <- c("A1","B1","C1","A2","B2","C2", 
+            "A3","B3","C3", "A4","B4","C4", 
+            "A5","B5","C5", 
+            "A6","B6","C6", "A7","B7","C7", 
+            "D1","D2","D3","D4")
+
+Sim_fungi <- Sim_fungi[ , sorder]
+
+
+```
+
+
+## Grafico
+
+```{r}
+
+## Quantile breaks
+
+#function
+quantile_breaks <- function(xs, n = 10) {
+  breaks <- quantile(xs, probs = seq(0,1, length.out = n))
+  breaks[!duplicated(breaks)]
+}
+
+mat_breaks <- quantile_breaks(Sim_fungi, # la matriz
+                              n = 10) 
+
+pheatmap(Sim_fungi,
+         cluster_rows = FALSE, cluster_cols = FALSE,
+         scale = "none", #regresemos a que no nos ponga escala
+         breaks = mat_breaks,
+         color = colorRampPalette(c("seashell", "steelblue2","orchid4", "darkblue"))(9),
+         gaps_col = c(3,6,9,12,15,18,21),
+         fontsize = 12,
+         labels_col = c (labels=c(rep("36LP",3),rep("WTLP",3),  
+                                  rep("36Pi",3), rep("WTPi",3),  
+                                  rep("36Phi",3), 
+                                  rep("36PM",3), rep("WTPM",3),
+                                  "BSLP","BSPi","BSPhi","BSPM")))
+
+```
+
+# Grupos especificos
+
+Si bien recuerdan FungalTraits  nos da un estilo de vida primario (que es el que usamos hace rato para el heatmap) pero tambien definio algunas de las especies con un estilo de vida secundario. Uno de estos grupos dentro de esta categoria es especies asociadas a raices (root-associated) usando esa clasificacion, graficaremos los hongos que ya han sido especificamente clasificados como habitantes de la rizosfera:
+
+
+### preprocesamiento : root associated
+
+```{r}
+Func_fungi <- read.csv("~/capR/curso/curso_Innovak/Material_clase/Functional_Fungi.csv")
+
+metadata <- read.csv("~/capR/curso/curso_Innovak/Material_clase/metadata.csv")
+
+#Preprocesamiento
+
+Func_fungi <- as.data.frame(t(Func_fungi))
+colnames(Func_fungi) <- Func_fungi[1,]
+Func_fungi <- Func_fungi[-1,]
+
+# cambiar a datos numericos
+
+for(i in 1:ncol(Func_fungi)){
+  Func_fungi[,i] <- as.numeric(Func_fungi[,i])
+}
+
+# Seleccionar root- associated
+
+Root_sums <- rowSums(Func_fungi[,c(11,12,22,36,40,48,50,53,55,63,66,73,77,81,86,88,94)])
+
+Root_sums <- cbind(metadata,Root_sums)
+
+
+# remover controles
+
+Root_cat <- Root_sums[c(1:21),]
+
+
+```
+
+# Boxplot
+
+```{r}
+
+#Agregamos un fila  vacia para que el grafico quede simetrico
+Root_cat[nrow(Root_cat) + 1,] <- list("E1", "WTPhi", "Wild Type", "Phi", NA, 0)
+
+# El grafico
+
+ggplot(Root_cat, aes(x= Treatment, y = Root_sums, fill = Plant_Type)) +
+  geom_boxplot() +
+  theme_bw(base_size = 15) +
+  scale_fill_manual(name = "Plant Type", values = c("steelblue", "lightpink"))+
+  xlab("Treatment") + ylab("Abundance") +
+  geom_signif(y_position = 7500, xmin= 2.6, xmax=3.4,
+              annotation = "p<0.01", tip_length = 0.01,
+              col = 1)+
+  geom_signif(y_position = 4100, xmin= 0.6, xmax=1.4,
+              annotation = "NS", tip_length = 0.01,
+              col = 1)+
+  geom_signif(y_position = 5000, xmin= 3.6, xmax=4.4,
+              annotation = "NS", tip_length = 0.01,
+              col = 1)+
+  scale_y_continuous(breaks = pretty_breaks(n = 6))
+
+
+```
+
